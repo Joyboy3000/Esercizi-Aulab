@@ -1,0 +1,84 @@
+/* STILE BASE */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* NAVBAR */
+nav {
+    background-color: #333;
+}
+
+.menu {
+    list-style: none;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+}
+
+.menu li {
+    margin-right: 15px;
+}
+
+.menu a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+/* Hover opzionale */
+.menu a:hover {
+    border-bottom: 2px solid yellow;
+}
+
+/* CONTENITORE ARTICOLO + ASIDE */
+.container {
+    display: flex;
+    padding: 20px;
+}
+
+/* ARTICOLO */
+article {
+    width: 60%;
+    padding: 20px;
+}
+
+/* ASIDE */
+aside {
+    width: 40%;
+    background-color: #fff3b0;
+    padding: 20px;
+}
+
+/* IMMAGINI */
+article img {
+    width: 300px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* BOTTONE TORNA SU */
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    z-index: 1000;
+}
+
+/* MEDIA QUERY MOBILE */
+@media screen and (max-width: 768px) {
+
+    .menu a {
+        font-size: 14px;
+    }
+
+    .container {
+        flex-direction: column;
+    }
+
+    article,
+    aside {
+        width: 100%;
+    }
+}
