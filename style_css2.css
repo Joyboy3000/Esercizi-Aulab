@@ -1,0 +1,58 @@
+/* RESET BASE */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* NAVBAR */
+nav {
+    background-color: #333;
+}
+
+.menu {
+    list-style: none;
+    margin: 0;
+    padding: 10px;
+    display: flex; /* link affiancati */
+}
+
+.menu li {
+    margin-right: 20px;
+}
+
+.menu a {
+    color: white;
+    text-decoration: none;
+    padding-bottom: 5px;
+}
+
+/* Hover opzionale */
+.menu a:hover {
+    border-bottom: 2px solid yellow;
+}
+
+/* CONTENITORE ARTICOLO + ASIDE */
+.container {
+    display: flex; /* affianca article e aside */
+    padding: 20px;
+}
+
+/* ARTICOLO */
+article {
+    width: 60%;
+    padding: 20px;
+}
+
+/* ASIDE */
+aside {
+    width: 40%;
+    background-color: #fff3b0; /* giallo chiaro */
+    padding: 20px;
+}
+
+/* IMMAGINI "LEGGI ANCHE" */
+article img {
+    width: 300px;
+    display: block;
+    margin-bottom: 10px;
+}
