@@ -1,0 +1,33 @@
+/* Font per il testo */
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+/* Font per il titolo */
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #eeeeee;
+}
+
+/* Titolo */
+h1 {
+    font-family: 'Pacifico', cursive;
+    color: #3366cc;
+}
+
+/* Background image */
+p {
+    background-image: url('https://picsum.photos/200');
+    padding: 100px;
+}
+
+/* Box con hover */
+.box {
+    background-color: #66cc99;
+    padding: 10px;
+    width: 200px;
+}
+
+.box:hover {
+    background-color: #339966;
+}
