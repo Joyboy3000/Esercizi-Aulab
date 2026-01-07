@@ -1,0 +1,96 @@
+/* =======================
+   BODY & NAVBAR
+======================= */
+body {
+    padding-top: 70px; /* spazio per navbar fissa */
+    font-family: Arial, sans-serif;
+}
+
+/* Navbar personalizzata */
+.navbar {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+/* =======================
+   HERO SECTION
+======================= */
+.hero {
+    height: 100vh; /* tutta altezza viewport */
+    background-image: url("assets/images/logo-aulab-futur.png"); /* percorso della tua immagine */
+    background-size: cover; /* l’immagine copre tutto lo spazio */
+    background-position: center; /* centrata */
+    background-repeat: no-repeat;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Overlay scuro sopra l’immagine */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* scurisce leggermente lo sfondo */
+}
+
+/* Testo sopra overlay */
+.hero .container {
+    position: relative;
+    z-index: 1; /* per stare sopra l’overlay */
+}
+
+/* =======================
+   SEZIONI & CARDS
+======================= */
+section {
+    padding: 60px 0;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* =======================
+   FORM ISCRIZIONE
+======================= */
+form input, form button {
+    border-radius: 0.25rem;
+}
+
+form button:hover {
+    opacity: 0.9;
+}
+
+/* =======================
+   FOOTER
+======================= */
+footer {
+    background-color: #111;
+    color: #aaa;
+    font-size: 14px;
+    padding: 30px 0;
+    text-align: center;
+}
+
+/* =======================
+   RESPONSIVE
+======================= */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+}
