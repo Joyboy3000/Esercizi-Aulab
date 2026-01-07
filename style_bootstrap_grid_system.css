@@ -1,0 +1,29 @@
+/* SPAZIO PER NAVBAR FISSA */
+body {
+    padding-top: 56px;
+}
+
+/* HERO SECTION */
+.hero {
+    height: 100vh;
+    background-image: url("https://picsum.photos/1200/800");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    text-align: center;
+}
+
+/* OVERLAY SCURO */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* TESTO SOPRA L'OVERLAY */
+.hero h1 {
+    position: relative;
+    z-index: 1;
+}
