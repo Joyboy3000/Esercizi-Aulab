@@ -1,0 +1,26 @@
+/* Spazio per navbar fissa */
+body {
+    padding-top: 56px;
+}
+
+/* Hero section */
+.hero {
+    height: 100vh;
+    background-image: url("https://picsum.photos/1200/800");
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    text-align: center;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.hero h1 {
+    position: relative;
+    z-index: 1;
+}

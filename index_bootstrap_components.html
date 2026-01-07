@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Cinema</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS personalizzato -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAVBAR BOOTSTRAP -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">Blog Cinema</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Film</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Contatti</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO SECTION -->
+<header class="hero d-flex align-items-center justify-content-center text-white">
+    <h1>Il Cinema che Amiamo</h1>
+</header>
+
+<!-- SEZIONE CARD FILM -->
+<section class="container my-5">
+    <h2 class="text-center mb-4">Film in evidenza</h2>
+
+    <div class="row">
+
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="https://picsum.photos/400/300" class="card-img-top" alt="film">
+                <div class="card-body">
+                    <h5 class="card-title">Drammatico</h5>
+                    <p class="card-text">Una storia intensa.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="https://picsum.photos/401/300" class="card-img-top" alt="film">
+                <div class="card-body">
+                    <h5 class="card-title">Commedia</h5>
+                    <p class="card-text">Leggerezza e divertimento.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="https://picsum.photos/402/300" class="card-img-top" alt="film">
+                <div class="card-body">
+                    <h5 class="card-title">Thriller</h5>
+                    <p class="card-text">Suspense garantita.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- CAROUSEL -->
+<section class="container my-5">
+    <div id="cinemaCarousel" class="carousel slide" data-bs-ride="carousel">
+
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="https://picsum.photos/900/400" class="d-block w-100" alt="">
+            </div>
+            <div class="carousel-item">
+                <img src="https://picsum.photos/901/400" class="d-block w-100" alt="">
+            </div>
+            <div class="carousel-item">
+                <img src="https://picsum.photos/902/400" class="d-block w-100" alt="">
+            </div>
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#cinemaCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+
+        <button class="carousel-control-next" type="button" data-bs-target="#cinemaCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+
+    </div>
+</section>
+
+<!-- ACCORDION FAQ -->
+<section class="container my-5">
+    <h2 class="text-center mb-4">FAQ</h2>
+
+    <div class="accordion" id="faqAccordion">
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                    Come posso collaborare?
+                </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    Compila il form nella sezione contatti.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq2">
+                    Il sito è gratuito?
+                </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    Sì, il sito è completamente gratuito.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq3">
+                    Ogni quanto pubblicate nuovi contenuti?
+                </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    Aggiorniamo il blog settimanalmente.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white text-center p-4">
+    <p>P.IVA: 12345678901</p>
+    <p>Blog Cinema</p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
