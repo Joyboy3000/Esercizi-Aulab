@@ -1,0 +1,134 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #4
+User story #4:
+Come Arnold 
+vorrei navigare su Presto nella mia lingua madre: l’inglese, 
+in modo tale da scoprire pezzi rari per la mia collezione
+ACCEPTANCE CRITERIA:
+Utilizzare delle bandiere per la selezione della lingua
+lingue
+IT
+EN
+extra (a scelta del team)
+USER STORY #4 - MULTILINGUA
+INSTALLAZIONE LIBRERIA DI BANDIERE
+Per permettere ai nostri utenti di navigare sul nostro sito in diverse lingue, prima di tutto creiamo la possibilità di selezionare una lingua 
+diversa.
+Avremo bisogno nella nostra navbar di una sezione dedicata al cambio lingua.
+Importiamo quindi nel progetto il pacchetto  outhebox/blade-flags, che fornisce file svg per le bandiere del mondo.
+Lanciamo quindi il comando nel terminale:
+ Una volta finiti i procedimenti di composer, pubblichiamo i file del pacchetto:
+Da user story, ci è richiesto di avere almeno tre lingue nel nostro sito: italiano, inglese e una lingua a scelta.
+Avremo quindi bisogno di vedere almeno tre bandiere nella navbar: per evitare ripetizioni, creeremo un componente dedicato proprio a 
+questo scopo.
+COMPONENTE _LOCALE
+Andiamo quindi in resources/views/components e creiamo un nuovo file, _locale.blade.php:
+1composer require outhebox/blade-flags
+1php artisan vendor:publish --tag=blade-flags --force
+
+--- PAGE 2 ---
+Analizziamo il codice:
+come vediamo il componente è costituito da un form: l’utente cliccando la bandiera renderizzata da questo componente in realtà starà 
+facendo una richiesta POST, che dobbiamo ancora sviluppare, equivalente al cambio lingua. Ricordiamoci di lasciare vuoto il campo 
+dell’action.
+Nel form, come sempre, è presente il @csrf token e il bottone di submit
+Nel bottone innestiamo un tag img che come source richiama il percorso interno al progetto per vedere l’immagine della bandiera. Il 
+metodo asset(), che vediamo a riga 4, svolge un ruolo fondamentale nella gestione delle risorse statiche, come immagini, fogli di 
+stile e file JavaScript. La sua funzione principale è generare URL completi per queste risorse, permettendo all'applicazione di 
+accedervi e renderle correttamente nel browser dell'utente.
+Vediamo che stiamo richiamando una variabile $lang: passeremo questo dato al componente al momento del suo richiamo.
+Richiamiamo quindi il componente in navbar.blade.php:
+Come vediamo, stiamo richiamando il componente _locale con l’attributo lang, che nel componente diventerà la variabile $lang che 
+notavamo in precedenza: il valore di lang sarà, nel nostro caso, rispettivamente, it, en e es, ovvero italiano e inglese, le lingue richieste, e 
+spagnolo, la lingua a scelta.
+Questa stringa servirà a specificare quale bandiera far visualizzare.
+Passiamo dunque alla gestione del cambio lingua vero e proprio.
+LOGICA DI IMPOSTAZIONE LINGUA
+Per gestire il cambio della lingua dovremo creare un Middleware apposito. Creiamolo:
+Come sappiamo, questo comando crea un file middleware nel percorso app\Http\Middleware.
+In SetLocaleMiddleware scriviamo:
+1php artisan make:middleware SetLocaleMiddleware
+
+--- PAGE 3 ---
+Cosa abbiamo fatto:
+All'interno del metodo handle, a riga7, il codice recupera la lingua preferita dalla sessione dell'utente utilizzando session('locale', 
+'it').
+La parte session('locale') tenta di ottenere il valore associato alla chiave "locale" dallo storage della sessione.
+Se non esiste alcun valore per "locale" nella sessione, viene utilizzato il valore predefinito "it" (italiano).
+A riga 8, la lingua recuperata ($localeLanguage) viene quindi passata al metodo App::setLocale. Questo metodo imposta la lingua 
+corrente dell'applicazione sulla lingua scelta.
+Infine, il middleware chiama la closure $next. Ciò consente essenzialmente alla richiesta di continuare l'elaborazione attraverso la catena 
+del middleware e raggiungere la rotta o il controller previsti.
+In sostanza, questo middleware controlla la sessione dell'utente per trovare una lingua preferita e imposta di conseguenza la 
+lingua dell'applicazione per ogni richiesta. Questo garantirà che gli utenti vedano contenuti e messaggi nella loro lingua preferita in base 
+ai dati della sessione.
+Per fare il modo che il middleware funzioni, dovremo registrarlo. Andiamo quindi in bootstrap/app.php e aggiungiamo quanto segue 
+all’interno della funzione di callback di  withMiddleware:
+Mentre in precedenza abbiamo utilizzato il metodo alias per il middleware IsRevisor, per questo middleware abbiamo bisogno di 
+richiamare il metodo web().
+
+--- PAGE 4 ---
+Questo metodo si occupa specificatamente del gruppo middleware web. Questo gruppo middleware web è una raccolta predefinita di 
+middleware comunemente usati per le rotte dell'applicazione web in Laravel.
+Il metodo web viene utilizzato con l'opzione append. Questa opzione ci consente di aggiungere il nostro middleware al gruppo 
+middleware web esistente per la rotta o il gruppo di rotte in cui viene applicato questo codice.
+In questa maniera non dovremo specificare una o più rotte a cui associare il middleware appena creato, ma partirà a prescindere.
+ROTTA PER CAMBIARE LINGUA
+Creiamo, infine, la rotta post da associare al componente _locale:
+E la relativa funzione in PublicController.php:
+Tramite questa funzione, stiamo creando una sessione con chiave locale e come valore $lang, il parametro in ingresso nella funzione.
+Modifichiamo quindi il componente:
+Abbiamo aggiunto all’attributo action la rotta appena creata, passando il dato che si aspetta $lang, ovvero la lingua selezionata 
+dall’utente.
+
+--- PAGE 5 ---
+TRADUZIONI
+CREARE LE TRADUZIONI
+In questa maniera abbiamo ultimato la logica riguardante il cambio della lingua: dobbiamo quindi occuparci della traduzione del sito vera e 
+propria.
+Per prima cosa pubblichiamo la cartella lang, tramite questo comando nel terminale:
+La cartella lang in Laravel è il cuore della localizzazione, ovvero la traduzione dell'applicazione in diverse lingue. Generata con il 
+comando lang:publish, ospita file di traduzione per ogni lingua supportata, organizzati per temi o componenti. Permette di 
+personalizzare i testi e gestire dinamicamente la lingua dell'utente, offrendo un'esperienza multilingue fluida e adattiva.
+Di default, la cartella lang avrà la sottocartella en, relativa alla lingua inglese, contenente a sua volta diversi file che si occupano di gestirà 
+diverse traduzioni di default, come ad esempio i messaggi di validazione che vediamo quando non li specifichiamo noi, contenuti nel file 
+validation.php.
+Dovremo creare, quindi, altre due sottocartelle, una per l’italiano, l’altra per la lingua scelta dal team: nel caso del nostro esempio saranno 
+lang/it e lang/es.
+In queste tre cartelle, en, it e es, creiamo un file: ui.php. Avremo quindi tre file:
+lang/en/ui.php
+lang/it/ui.php
+lang/es/ui.php
+Lo scopo di questi file sarà restituire un array chiave valore: 
+la chiave sarà utilizzata per richiamare la traduzione nel sito.
+il valore corrisponderà alla traduzione vera e propria.
+Ad esempio, in lang/it/ui.php avremo: 
+1php artisan lang:publish
+Le chiavi dovranno essere le stesse per tutti e tre i file.
+
+--- PAGE 6 ---
+In lang/en/ui.php avremo:
+E così via per tutte le traduzioni del sito.
+UTILIZZARE LE TRADUZIONI IN BLADE
+A questo punto, ci manca solo come richiamare queste traduzioni nei file blade. 
+Per farlo utilizzeremo questa sintassi:
+Questa sintassi utilizza la funzione __() per tradurre una stringa definita nel file di traduzione. 
+La stringa da tradurre viene passata come argomento alla funzione __() e deve essere formattata come 
+'nomeFile.nomeChiaveTraduzione':
+ 'nomeFile' rappresenta il nome del file di traduzione 
+Valuta quanto tempo hai a disposizione rispetto alle altre richieste: se hai poco tempo, limitati a tradurre le parti statiche principali 
+del sito web (es. solo homepage).
+1{{ __('nomeFile.nomeChiaveTraduzione') }}
+
+--- PAGE 7 ---
+'nomeChiaveTraduzione' rappresenta la chiave della stringa da tradurre.
+Nel nostro caso, ad esempio:
+Dovremo, quindi creare e richiamare una chiave, con relative traduzioni per ogni parte statica del sito.
+A questo punto potremo definire conclusa la US4.
+Una volta testato tutto, possiamo pushare le modifiche su GitHub.
+Per tradurre le categorie, utilizzate i nomi delle categorie stesse come chiavi per le traduzioni, così da poterle richiamare 
+dinamicamente in questa maniera:
+1{{__("ui.$category->name")}}
+1git add .
+2git commit -m "User Story 4 completata"
+3git push

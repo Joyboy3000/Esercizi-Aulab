@@ -1,0 +1,167 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #5
+User Story #5:
+Come Linda 
+vorrei poter aggiungere N foto al mio annuncio, 
+in modo tale da descriverlo in modo più accurato
+ACCEPTANCE CRITERIA:
+Il sistema deve consentire l’inserimento in blocco di N immagini
+Il sistema deve consentire la rimozione di una immagine per volta
+Il sistema deve mostrare l'anteprima delle immagini inserite
+Utilizzo di Laravel File Storage
+USER STORY #5 - INSERIMENTO DI IMMAGINI MULTIPLE
+MODELLO IMAGE
+MIGRAZIONE
+Con la User Story 5 introduciamo la possibilità per l’utente di associare agli articoli una o più immagini in blocco al momento della creazione.
+Per fare ciò creiamo nel progetto una nuova entità, Image, dotata di modello e migrazione:
+Gestiamo quindi la migrazione:
+Abbiamo creato:
+una colonna path che accetta come tipo di dato string
+una colonna article_id che accetterà la foreign key relativa alla tabella articles
+Lanciamo quindi la migrazione:
+1php artisan make:model Image -m
+
+--- PAGE 2 ---
+RELAZIONI
+Gestiamo quindi il modello Image.php:
+Le immagini saranno caratterizzate dal loro path e saranno legate agli articoli da una relazione 1-N: un articolo può avere tante immagini, 
+una immagine è relazionata ad un unico articolo, salvato in article_id.
+Abbiamo quindi creato la funzione di relazione article(), in cui specifichiamo che una singola immagine appartiene a un singolo 
+oggetto di classe Article.
+Ricordiamoci di importare le classi:
+Come sappiamo le funzioni di relazione sono sempre a doppio senso: creiamo la corrispettiva funzione in Article.php:
+1php artisan migrate
+2php artisan migrate:rollback
+3php artisan migrate
+
+--- PAGE 3 ---
+Con questa funzione stiamo specificando che un singolo oggetto di classe Article può avere più oggetti di classe Image.
+Ricordiamoci di importare le classi:
+AGGIORNAMENTO DEL FORM DI CREAZIONE
+PERMETTERE A LIVEWIRE DI MANIPOLARE DEI FILES
+Da questo momento, consentiremo all’utente di caricare insieme all’articolo dei file multimediali: le immagini. Ciò in livewire è reso possibile 
+e gestito dal trait Livewire/WithFileUploads.
+Specifichiamo, dunque, in CreateArticleForm.php che vogliamo sfruttare questo trait in questa maniera:
+
+--- PAGE 4 ---
+Ricordiamoci di importare la classe, come nello screenshot.
+Avremo poi bisogno di specificare due nuovi attributi:
+la proprietà $images ci servirà successivamente per creare le singole istanze di classe Image da salvare nel database.
+la proprietà $temporary_images ci servirà per gestire le immagini temporanee appena caricate dall’utente
+AGGIORNAMENTO DEL COMPONENTE FRONTEND
+Andiamo quindi a gestire il componente frontend. 
+In create-article-form.blade.php:
+
+--- PAGE 5 ---
+Analizziamo quanto abbiamo scritto:
+Abbiamo un input di tipo file: 
+collegato da data binding con la proprietà temporary_images
+con attributo HTML multiple, per permettere la selezione di più immagini 
+con direttiva @error per dare riscontro visivo in caso di errori
+Successivamente facciamo un controllo: se l’array $images non è vuoto, allora vedremo un’altra porzione, dedicata alla PREVIEW 
+DELLE IMMAGINI:
+per ognuna delle immagini salvate nell’array, generiamo un div vuoto, con background-image l’url temporaneo dell’immagine, 
+recuperato dal metodo di livewire temporaryUrl(). Utilizziamo un div con background-image per simulare anche in fase di preview 
+l’effetto del crop dell’immagine.
+Ad esempio:
+La classe img-preview non è una classe di bootstrap: poiché i div assumono la dimensione del proprio contenuto, per fare in 
+modo di visualizzare le preview delle immagini è necessario dare a questa classe una dimensione predefinita.
+
+--- PAGE 6 ---
+LOGICA DI VALIDAZIONE DELLE IMMAGINI
+Abbiamo però bisogno di un metodo che valorizzi $images in CreateArticleForm.php:
+Cosa stiamo facendo:
+Abbiamo creato un metodo chiamato updatedTemporaryImages(). Il nome non è casuale: updated + nome attributo è una sintassi 
+specifica di livewire, utilizzata per monitorare e aggiornare in tempo reale i cambiamenti della proprietà richiamata nel nome del metodo 
+stesso (nel nostro caso $temporary_images)
+updated è un hook in livewire: 
+In generale, un hook è un punto di accesso predefinito all'interno di un framework o di una libreria che consente agli sviluppatori di 
+intercettare e modificare il comportamento del software in momenti specifici del ciclo di vita di un componente.
+updated viene chiamato quando una proprietà pubblica di un componente viene modificata sul client. Questo hook fornisce 
+un punto di accesso per reagire alle modifiche delle proprietà prima che il componente venga aggiornato sul server.
+
+--- PAGE 7 ---
+Riga 3: Iniziamo con un controllo: se le regole di validazione sono rispettate, allora salviamo ognuna delle immagini temporanee 
+all’interno dell’array $images.  
+'temporary_images.*' - setterà le regole di validazione per ogni immagine presente nell’array, quindi ogni immagine deve 
+pesare massimo 1024
+‘temporary_images' - setta le regole per tutto l’array, quindi possono essere inserite massimo 6 immagini
+Per questo motivo nella pagina blade abbiamo inserito due direttive @error
+Lo stiamo facendo tramite la cosìdetta sugar syntax $this->images[] = $image. 
+images è il nome dell’array che stiamo modificando
+[] indica, appunto, che stiamo lavorando con un array
+= è l’operatore di assegnazione, stiamo specificando che vogliamo dare l’elemento che segue l’uguale come valore all’elemento 
+dell’array
+$image è l’elemento che vogliamo salvare nell’array
+Il corrispettivo di questo codice in sintassi standard sarebbe:  array_push($this->images, $image).
+Questo array sarà responsabile della visualizzazione delle immagini in preview.
+PERMETTERE ALL’UTENTE DI ELIMINARE DELLE IMMAGINI DAL FORM
+Oltre alla preview delle immagini, vogliamo dare all’utente la possibilità di eliminare le immagini singolarmente in fase di caricamento.
+Creiamo quindi una funzione apposita in CreateArticleForm.php:
+il metodo removeImage() accetta in ingresso un parametro, $key
+al suo interno facciamo un controllo: se l’immagine selezionata è presente nell’array $images viene eliminata dall’array (e quindi non 
+sarà né visualizzata né salvata. 
+Per fare ciò stiamo utilizzando diverse funzioni built-in di PHP:
+in_array() verifica se un dato (il primo parametro) è presente all’interno di un array (secondo parametro) - documentazione di PHP
+array_keys() : restituisce tutte le chiavi o indici dell’array passato come parametro - documentazione di PHP
+unset(): elimina dati elementi dall’interno di un array. - documentazione di PHP
+ 
+Una volta creata la funzione, diamo la possibilità all’utente di utilizzarla.
+Modifichiamo dunque il form di creazione in create-article-form.blade.php:
+
+--- PAGE 8 ---
+Per ogni immagine, oltre alla preview stiamo generando anche un button: questo bottone una volta cliccato, grazie all’attributo di livewire 
+wire:click farà partire il metodo removeImage() appena creato, passandogli come parametro reale la chiave dell’immagine ciclata in 
+quel momento.
+AGGIORNAMENTO DELLA LOGICA DI SALVATAGGIO
+Aggiorniamo finalmente la funzione store() in CreateArticleForm.php per salvare nel database anche le immagini da collegare 
+all’articolo al momento della sua creazione.
+Cosa stiamo facendo:
+A riga 4, stiamo salvando l’articolo creato nell’attributo della classe article, richiamato dalla pseudovariabile $this
+A riga 13-17, una volta creato l’articolo, se l’utente ha inserito delle immagini, per ognuna di queste creiamo, tramite la funzione di 
+relazione con article ($this->article->images()), un oggetto di classe Image:
+il file sarà salvato nello storage, nel percorso storage/app/public/images
+il percorso dell’immagine sarà salvato nella tabella images del database
+
+--- PAGE 9 ---
+Al submit del form, per evitare che rimangano le preview delle immagini precedenti, dobbiamo aggiornare anche il metodo custom 
+cleanForm():
+Testiamo.
+VISUALIZZAZIONE FRONTEND DELLE IMMAGINI
+Poiché stiamo salvando le immagini nello storage, ricordiamoci di creare il collegamento con la cartella public:
+A questo punto, possiamo far in modo di visualizzare, laddove ci siano, le immagini effettivamente associate agli articoli invece che le 
+immagini segnaposto utilizzate finora.
+Iniziamo modificando la dashboard del revisore.
+REVISOR INDEX
+In resources/views/revisor/index.blade.php dobbiamo modificare il carosello che avevamo impostato come segnaposto in 
+precedenza:
+Prima di cliccare submit, aspetta che si carichino le anteprime delle immagini: a seconda della tua connessione, il componente 
+potrebbe metterci un po' di tempo.
+1php artisan storage:link
+
+--- PAGE 10 ---
+Cosa stiamo facendo:
+Se l’articolo $article_to_check ha delle immagini (ovvero se il count() della collezione restituisce un numero maggiore di 0), per 
+ognuna delle immagini creiamo una colonna e un tag img.
+Se non c'è nessuna immagine, vedremo sempre l’immagine segnaposto.
+AGGIORNAMENTO DELLE CARD DEGLI ARTICOLI
+Permettiamo di vedere anche nella card una delle immagini caricate dall’utente invece di quella segnaposto, nel caso ci sia.
+Modifichiamo dunque il tag img del componente card.blade.php:
+Stiamo utilizzando un operatore ternario:
+$article->images->isNotEmpty(): controlliamo che la collezione delle immagini relazionate all’articolo non sia vuota:
+Storage::url($article->images->first()->path): se la condizione è rispettata, e quindi c'è almeno una immagine, verrà 
+eseguito questo codice. Al metodo statico della classe Storage url(), utilizzato per generare un URL pubblico per un file archiviato 
+nel sistema di storage, passiamo il path della prima immagine della collezione relazionata all’articolo
+Altrimenti visualizziamo l’immagine di default (in questo caso quella di lorem picsum)
+AGGIORNAMENTO DI ARTICLE SHOW
+In views/article/show.blade.php :
+
+--- PAGE 11 ---
+Se ci sono delle immagini, viene generato un carosello in cui, per ognuna delle immagini, viene generata una slide
+Solo se c'è più di una immagine vengono fatti visualizzare i bottoni necessari a cambiare slide
+Se non ci sono immagini, vediamo quella di default.
+Con quest’ultima modifica abbiamo portato a termine la User Story 5.
+Una volta testato tutto, possiamo pushare le modifiche su GitHub.
+1git add .
+2git commit -m "User Story 5 completata"
+3git push

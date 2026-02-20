@@ -1,0 +1,60 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #8
+User story #8:
+Come Linda 
+vorrei che i volti delle persone siano oscurati
+in modo tale da preservare la privacy quando carico un’immagine
+ACCEPTANCE CRITERIA:
+Applicare un’immagine di censura sui volti
+USER STORY #8 - RIMOZIONE DEI VOLTI
+La User Story 8 ci richiede di applicare un’immagine di censura sui volti laddove siano rilevati nelle foto caricate dagli utenti.
+JOB DI RIMOZIONE DEI VOLTI
+Anche questa operazione vogliamo sia svolta in modalità asincrona.
+Creiamo quindi un job apposito:
+Andiamo quindi in app/Jobs/RemoveFaces.php:
+1php artisan make:job RemoveFaces
+
+--- PAGE 2 ---
+E importiamo le classi:
+Mi raccomando, fai attenzione a rispettare la sintassi!
+
+--- PAGE 3 ---
+Fino a riga 26, il codice è sostanzialmente identico ai due precedenti.
+Analizziamo le differenze:
+A riga 27, a partire dall'oggetto ImageAnnotatorClient, salvato in $response, facciamo partire faceDetection() sull’immagine, 
+utilizzato per rilevare i volti.
+A riga 28, sul risultato di questo metodo facciamo partire getFaceAnnotations. Questo metodo serve a recuperare informazioni sui 
+volti individuati nell'immagine. Restituisce un campo ripetuto contenente una lista di oggetti FaceAnnotation. Il risultato è quindi salvato 
+in $faces.
+A riga 30, il ciclo foreach vuoto foreach ($faces as $face) : stiamo iterando sui volti rilevati. 
+All'interno del ciclo, il codice estrae le coordinate dei vertici del bounding box (un modo di definire la posizione e le dimensioni di un 
+oggetto in un'immagine) che circonda ogni volto utilizzando $face->getBoundingPoly()->getVertices().
+A riga 33 creiamo un array $bounds per memorizzare le coordinate dei vertici.
+Righe 35-37, calcola la larghezza e l'altezza del bounding box del volto.
+A riga 42, carichiamo quindi l'immagine utilizzando la libreria Spatie Image (SpatieImage::load($srcPath)) per poter effettuare la 
+censura dei volti.  
+Da riga 44, a partire da questa immagine, utilizziamo il metodo watermark per sovrapporre a ogni volto rilevato una immagine di 
+censura da noi scelta. N.B.: dare il percorso giusto dell’immagine nel vostro progetto.
+paddingX e paddingY specificano lo spostamento orizzontale e verticale della sovrapposizione rispetto all'angolo superiore sinistro 
+del bounding box.
+width e height definiscono la larghezza e l'altezza dell'immagine di sovrapposizione, forzata ad adattarsi alle dimensioni del 
+bounding box con fit: Fit::Stretch.
+A riga 56, infine, salviamo l'immagine modificata con la sovrapposizione sovrascritta sul percorso originale utilizzando $image-
+>save($srcPath).
+AGGIORNAMENTO DELLA LOGICA DI SALVATAGGIO
+Una volta ultimato il codice del job, stoppiamo e facciamo ripartire il terminale delle code e specifichiamo nella funzione store() in 
+CreateArticleForm.php quando farlo partire:
+
+--- PAGE 4 ---
+Come vediamo, invece di fare un semplice dispatch, stiamo utilizzando il metodo withChain() (riga 11).
+In Laravel, il metodo withChain() serve ad avviare una serie di job concatenati, creando una sequenza in cui il completamento di un job 
+innesca l'esecuzione del successivo.
+Questo ti consente di orchestrare una serie di attività in un ordine specifico, garantendo che ogni job venga eseguito solo dopo il 
+completamento riuscito del precedente.
+Ricordiamoci di importare la classe:
+E testiamo.
+Possiamo considerare ultimata la User Story 8.
+Pushamo le modifiche su GitHub:
+1git add .
+2git commit -m "US 8 completata"
+3git push

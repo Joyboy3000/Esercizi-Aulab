@@ -1,0 +1,161 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #7
+User story #7:
+Come Pablo
+vorrei avere una indicazione rapida, orientativa e automatica sul  contenuto delle immagini caricate dagli utenti 
+in modo tale da svolgere il mio lavoro in maniera più efficiente
+ACCEPTANCE CRITERIA:
+Utilizzo dell’intelligenza artificiale di Google
+Implementazione di Google Vision Api
+Il file google_credential.json, che trovate sotto al video della User Story, dev'essere inserito in .gitignore
+Non deve rallentare la navigazione (funzionamento async)
+La UI/UX deve essere efficace: mettetevi nei panni di Pablo
+USER STORY #7 - GOOGLE VISION API
+INSTALLAZIONE & MIGRAZIONE
+La User Story 7 ci richiede di utilizzare l’intelligenza artificiale di Google per fare ulteriori controlli sulle immagini caricate dagli utenti, così da 
+fornire un tool di supporto al lavoro dei revisor.
+Prima di partire, controlla i materiali e scarica il json delle chiavi API di Google Vision. Inserisci il file nella root del progetto. Assicurati che il 
+file si chiami google_credential.json.
+Una volta scaricato, vai nel file .gitignore e inserisci il nome del json.
+Fatto questo, installiamo nel nostro progetto il pacchetto Cloud Vision di Google che ci permettera' di interagire facilmente con le 
+funzionalita' di visione artificiale di Google Cloud:
+Come funziona Google Vision API:
+Google Cloud Vision API è un servizio di machine learning che permette di estrarre informazioni dalle immagini. Utilizza modelli pre-
+addestrati su enormi dataset di immagini per eseguire diverse attività di riconoscimento: ciò permette di identificare ed estrarre 
+caratteristiche specifiche dall'immagine di input.
+In particolare, a noi interessa la possibilità di rilevare:
+etichette per meglio definire e descrivere l’immagine e il suo contenuto;
+contenuti potenzialmente inappropriati.
+ 
+Inserire il file nella root del progetto - quindi in nessuna cartella specifica - ti permette di rendere il file facile da recuperare.
+Inserire google_credential.json in .gitignore e' fondamentale! Infatti se il file viene pushato su una repository online, le 
+chiavi vengono automaticamente bloccate e questo puo' creare problemi a te e ai tuoi colleghi.
+1composer require google/cloud-vision -w
+Cloud Vision e' un wrapper PHP, ovvero un pezzo di codice che funge da “intermediario” tra un’applicazione PHP e un’altra libreria.
+
+--- PAGE 2 ---
+Avremo bisogno di salvare i dati rilevati dall’API: per fare ciò creiamo una nuova migrazione.
+Modifichiamo quindi questa migrazione appena creata:
+Stiamo aggiungendo sei nuove colonne alla già esistente tabella images:
+labels: servirà a salvare le etichette rilevate dall’AI per descrivere l’immagine
+adult,spoof,racy, medical e violence: serviranno a salvare il grado di eventuale inappropriatezza dell’immagine in base a questi 
+argomenti.
+Lanciamo quindi la migrazione:
+Vogliamo che i controlli permessi da questa API siano effettuati in asincrono: dovremo, dunque, creare un Job apposito.
+CREAZIONE DEL JOB DI VALUTAZIONE DELL’IMMAGINE
+Creiamo il job:
+Come abbiamo visto, questo comando creerà un nuovo file nella directory app/Jobs.
+Modifichiamo il job appena creato, GoogleVisionSafeSearch.php:
+1php artisan make:migration add_google_vision_fields_to_images_table
+1php artisan migrate
+2php artisan migrate:rollback
+3php artisan migrate
+1php artisan make:job GoogleVisionSafeSearch
+
+--- PAGE 3 ---
+Importiamo le classi:
+Facciamo attenzione a rispettare esattamente la sintassi qui riportata.
+
+--- PAGE 4 ---
+Analizziamo per bene il codice:
+Proprietà della classe:
+Riga 5, private $article_image_id: Questa proprietà privata memorizza l'ID dell'immagine dell'articolo da analizzare.
+Riga 6-9, il costruttore (__construct) prende $article_image_id come parametro e lo assegna alla proprietà privata.
+Metodo handle:
+A riga 14, innanzitutto recuperiamo l'istanza del modello Image dal database utilizzando il metodo find con il $article_image_id 
+memorizzato e la salva nella variabile $i. Se non viene trovata alcuna immagine, il job termina subito utilizzando return.
+A riga 18, in caso contrario, recuperiamo il contenuto dell'immagine dallo storage utilizzando file_get_contents e lo salva nella 
+variabile $image. 
+file_get_contents ritorna il file sotto forma di stringa
+Il percorso viene costruito combinando il percorso di storage (storage_path), il percorso pubblico dell'applicazione (app/public) e 
+il percorso dell'immagine memorizzato nel modello ($i->path).
+A riga 19, viene poi impostata una variabile di ambiente chiamata GOOGLE_APPLICATION_CREDENTIALS utilizzando putenv. Questa 
+variabile punta al file JSON associato a questa user story contenente le credenziali Google Cloud per accedere all'API Vision. 
+A riga 21, viene salvato nella variabile $imageAnnotator un oggetto ImageAnnotatorClient, che interagisce con l'API Google Cloud 
+Vision.
+A riga 22, in $response salviamo il risultato del metodo safeSearchDetection lanciato a partire dall’oggetto appena creato, passando 
+il contenuto dell'immagine ($image) come argomento. Questo metodo esegue un'analisi di ricerca sicura sull'immagine. Il client 
+viene quindi chiuso utilizzando $imageAnnotator->close().
+A riga 25, recuperiamo l'oggetto SafeSearchAnnotation dalla risposta utilizzando $safe = $response-
+>getSafeSearchAnnotation(): in questa maniera estraiamo i valori di probabilità delle categorie per cui abbiamo creato le colonne 
+nella tabella images (adult,spoof,racy, medical e violence) dall'oggetto SafeSearchAnnotation utilizzando, tra riga 29 e 32, 
+metodi getter come $adult = $safe->getAdult(), ecc.
+A riga 34 viene definito un array chiamato $likelihoodName. Questo array mappa i valori di probabilità (numerici) ai corrispondenti 
+nomi delle classi Bootstrap Icons, per consentire una più facile rappresentazione visiva).
+Tra riga 43 e 47, il job aggiorna l'istanza del modello Image ($i) con i nomi delle classi di icone mappate per ogni categoria utilizzando 
+proprietà come $i->adult = $likelihoodName[$adult].
+Infine, il modello immagine aggiornato viene salvato nel database utilizzando $i->save().
+INSTALLAZIONE DELLE BOOTSTRAP ICONS
+Ricordiamoci di importare le icone di bootstrap nel nostro progetto per poterle visualizzare correttamente:
+Assicuriamoci di aver chiamato il file json, che vi forniremo noi, esattamente in questa maniera
+1npm i bootstrap-icons
+
+--- PAGE 5 ---
+E aggiorniamo app.css:
+AGGIORNAMENTO DELLA LOGICA DI SALVATAGGIO
+Come in precedenza, vogliamo che questo job parta al caricamento dell’articolo e, quindi, delle sue immagini. 
+ 
+Per questo motivo, modifichiamo la funzione store() in CreateArticleForm.php:
+E importiamo la classe:
+Avendo noi fatto delle modifiche sui job, interrompiamo il terminale delle code (ctrl + C o chiudendolo del tutto), puliamo la cache 
+e facciamolo ripartire.
+Questo procedimento andrà ripetuto ad ogni modifica del job.
+
+--- PAGE 6 ---
+Adesso avremo bisogno di un modo di visualizzare questi nuovi dati salvati nel database.
+Andiamo in revisor/index.blade.php:
+Come vediamo, al posto dei semplici tag img finora generati nel foreach, adesso per ogni immagine associata all’articolo generiamo una 
+card, che, oltre all’immagine, che farà visualizzare le icone salvate nel database dal job.
+CREAZIONE DEL JOB PER ETICHETTARE L’IMMAGINE
+Creiamo adesso un secondo job: avrà un funzionamento molto simile al precedente, ma si occuperà di rilevare e salvare nel database le 
+etichette delle singole immagini nella colonna labels.
+Quella qui esposta è solo una delle possibilità di resa grafica di questa user story. 
+È importante però ricordarsi che sarà necessario trovarsi all’interno di un foreach delle immagini per poter accedere ai dati della 
+singola immagine.
+
+--- PAGE 7 ---
+Scriviamo dunque nel terminale:
+E modifichiamo il file appena generato, GoogleVisionLabelImage.php:
+E importiamo le classi:
+Analizziamo quanto scritto:
+Come possiamo notare, gran parte del job è identica a quanto scritto nel job precedente. Le differenze partono da riga 24:
+1php artisan make:job GoogleVisionLabelImage
+
+--- PAGE 8 ---
+A riga 24, l'oggetto ImageAnnotatorClient salvato in $imageAnnotator chiama il metodo labelDetection del client, passando il 
+contenuto dell'immagine ($image) come parametro. Questo metodo etichetta l'immagine identificando oggetti e scene al suo 
+interno. La risposta del metodo viene memorizzata nella variabile $response.
+A riga 25, recuperiamo l'array di etichette (LabelAnnotations) dalla risposta utilizzando $labels = $response-
+>getLabelAnnotations().
+A riga 27, se sono presenti etichette (if ($labels)) viene creato un array vuoto $result per memorizzare le descrizioni delle 
+etichette.
+A riga 29, si cicla attraverso l'array delle etichette (foreach) e per ogni etichetta ($label) si estrae la descrizione 
+(getDescription()) e la si aggiunge all'array dei risultati ($result[]).
+A riga 33, aggiorniamo l'istanza del modello Image ($i) con l'array dei risultati ($i->labels = $result) che contiene le 
+descrizioni delle etichette.
+Infine, salviamo l'immagine aggiornata nel database utilizzando $i->save() e viene chiuso il client utilizzando $imageAnnotator-
+>close().
+CASTING DELLE LABELS
+Poiché questo job restituirà nel database una serie di dati, facciamo una modifica nel modello Image.php per garantire coerenza del tipo di 
+dato e semplificare la gestione di strutture dati complesse memorizzate nel database:
+Il metodo casts() fornito da laravel consente di fare il casting: il casting in Laravel è un processo di conversione automatica dei dati tra 
+formati diversi. Viene utilizzato principalmente per convertire i valori memorizzati nel database in tipi di dati PHP più adatti per l'utilizzo nelle 
+applicazioni Laravel. Questo semplifica la gestione e la manipolazione dei dati all'interno del framework. 
+In questo caso stiamo facendo il casting della colonna labels in array.
+AGGIORNAMENTO DELLA LOGICA DI SALVATAGGIO
+Facciamo quindi in modo che il job parta dopo la creazione dell’articolo, come fatto in precedenza.
+In CreateArticleForm.php, nella funzione store():
+
+--- PAGE 9 ---
+E importiamo la classe:
+AGGIORNAMENTO DELLA REVISOR INDEX
+Infine, gestiamo la visualizzazione di questi dati nella pagina del revisore.
+In revisor/index.blade.php:
+
+--- PAGE 10 ---
+Come in precedenza, abbiamo aggiunto una colonna alla card generata per ogni immagine, in cui iteriamo le etichette restituite dal job.
+Una volta testato tutto, pushamo le modifiche su GitHub:
+Prima di pushare, assicurati che google_credential.json sia in .gitignore!
+1git add .
+2git commit -m "US7 terminata"
+3git push

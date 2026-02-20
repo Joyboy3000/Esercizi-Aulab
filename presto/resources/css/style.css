@@ -1,0 +1,49 @@
+:root {
+    --brand-primary: #0f4c81;
+    --brand-accent: #f28f3b;
+    --brand-dark: #1e2a3a;
+    --brand-soft: #eef3f7;
+}
+
+body {
+    background-color: #f6f8fb;
+    color: #1f2d3a;
+}
+
+.layout-content {
+    min-height: 75vh;
+}
+
+.hero {
+    background: linear-gradient(120deg, #0f4c81, #256fb0);
+    border-radius: 1rem;
+    color: #fff;
+}
+
+.btn-custom {
+    background-color: var(--brand-accent);
+    border-color: var(--brand-accent);
+    color: #1f2d3a;
+    font-weight: 600;
+}
+
+.btn-custom:hover {
+    background-color: #e67f2c;
+    border-color: #e67f2c;
+    color: #1f2d3a;
+}
+
+.card-article {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-article:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0.75rem 1.5rem rgba(15, 76, 129, 0.12);
+}
+
+.thumb-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}

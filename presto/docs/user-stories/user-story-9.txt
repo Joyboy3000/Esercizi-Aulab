@@ -1,0 +1,31 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #9
+User story #9:
+Come Guohua
+vorrei aggiungere un watermark alle immagini, 
+in modo tale da aumentare la fidelity della piattaforma
+ACCEPTANCE CRITERIA:
+Inserimento del watermark sulle immagini caricate
+Il logo deve essere visibile
+Il posizionamento è a discrezione del team di sviluppo
+DOCUMENTAZIONE:
+Adding a watermark | image 
+USER STORY #9 - WATERMARK
+La User Story 9 ci richiede di aggiungere a ogni immagine caricata dagli utenti un watermark riconoscibile del nostro sito per aumentare la 
+fidelity.
+Per fare ciò basterà modificare il già esistente ResizeImage.php: subito dopo aver croppato l’immagine apporremo il nostro watermark.
+Come vediamo, abbiamo concatenato a riga 10 il metodo watermark() fornito sempre dalla classe Spatie/Image/Image.
+watermark() accetta diversi parametri:
+il percorso del file che vogliamo utilizzare come filigrana (utilizzate il percorso del file presente nel vostro progetto)
+possiamo poi specificare diversi parametri opzionali a nostro piacimento:
+le dimensioni, di default prese in pixels
+il padding
+la posizione: di default sarà posizionato in basso a destra.
+Importiamo la classe:
+
+--- PAGE 2 ---
+Per testare, bloccare il terminale delle code e farlo ripartire.
+Possiamo ritenere conclusa la User Story 9. Pushiamo quindi tutto su GitHub:
+1git add .
+2git commit -m "US 9 completata"
+3git push

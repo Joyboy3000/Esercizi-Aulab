@@ -1,0 +1,224 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #6
+User story #6: 
+Come Pino 
+vorrei una grafica chiara con le immagini della stessa di dimensione
+in modo tale da avere un layout pulito e facile da navigare
+ACCEPTANCE CRITERIA:
+Crop automatico delle immagini (es. 300x300)
+Dimensioni a scelta del team di sviluppo/designer
+Il crop non deve rallentare la request (deve agire in modo asincrono)
+USER STORY #6 - CROP AUTOMATICO DELLE IMMAGINI
+La User Story 6 ci richiede di gestire le dimensioni delle immagini inserite dagli utenti: le immagini al caricamento saranno automaticamente 
+ridimensionate in base a dei valori stabiliti da noi.
+Per fare ciò abbiamo bisogno di installare un pacchetto esterno a Laravel, Spatie Image.
+Per poter utilizzare Spatie abbiamo bisogno di installare nella nostra macchina una nuova estensione di PHP , Imagick.
+INSTALLAZIONE IMAGICK
+PER WINDOWS
+Scaricare il file zip trovato a questo indirizzo relativo alla versione 8.3 di php: Install the ImageMagick PHP extension in Windows  
+Estrarre il file zip all’interno della cartella di php 8.3 creando una nuova cartella chiamata php_imagick_3.7.0
+Ecco cosa vedremo in : C:\php\8.3
+L’installazione sarà diversa a seconda del sistema operativo, segui la guida qui sotto.
+php_imagick_3.…23 mag 2024, 01:08 PMx64.zip
+
+--- PAGE 2 ---
+Entrare nella cartella php_imagick_3.7.0 
+Copiare il file php_imagick_ts.dll all’interno della cartella ext di php, nel nostro caso : C:\php\8.3\ext
+Rinominare il file  php_imagick_ts.dll in php_imagick.dll
+Aggiungere questa estensione al php.ini che troviamo all’interno della cartella di PHP in questa maniera:
+Attenzione all’interno della cartella php_imagick_3.7.0 troverete il file php_imagick_ts.dll e il file php_imagick_nts.dll  : dovremo 
+utilizzare il file nts solo nel caso abbiamo installato sulla nostra macchina una versione di php Non Thread Safe
+
+--- PAGE 3 ---
+Aggiungere il path della cartella all’interno delle variabili d’ambiente:
+
+--- PAGE 4 ---
+
+
+--- PAGE 5 ---
+Riavvia il pc per rendere effettive le modifiche.
+Una volta riavviato il pc apriamo un terminale e lanciamo il comando 
+E vedremo un risultato simile:
+1php -m
+
+--- PAGE 6 ---
+Troveremo nelle lista dei moduli attivi imagick: l’installazione è andata a buon fine.
+MAC
+Per quanto riguarda i sistemi MacOs dovremo fare un ulteriore installazione per permettere il coretto funzionamento di SpatieImage
+La prima cosa da fare è installare Imagick e pkg-config. 
+Per installarli andremo ad utilizzare HomeBrew, con i seguenti comandi:
+La prossima cosa da fare è installare l'estensione Imagick utilizzando PECL, eseguendo il seguente comando; potresti dover utilizzare 
+sudo in caso di problematiche
+Non è necessario installare direttamente PECL , poiché viene installato da Homebrew come parte dell'installazione di PHP.
+Una volta completata l'installazione, dovresti vedere un output simile al seguente nella parte inferiore dell'output del terminale del 
+comando.
+In tal caso, l'estensione è stata installata correttamente.
+Ora, come la maggior parte delle cose quando si tratta di computer, è bene controllare. Quindi, se esegui il seguente comando, dovresti 
+vedere imagick nella lista dei moduli attivi 
+1brew install imagemagick
+2
+3brew install pkg-config
+1pecl install imagick
+1Build process completed successfully
+2Installing '/usr/local/Cellar/php@8.1/8.1.20_2/include/php/ext/imagick/php_imagick_shared.h'
+3Installing '/usr/local/Cellar/php@8.1/8.1.20_2/pecl/20210902/imagick.so'
+4install ok: channel://pecl.php.net/imagick-3.7.0
+5Extension imagick enabled in php.ini
+1php -m
+
+--- PAGE 7 ---
+CROP DELLE IMMAGINI
+CREAZIONE DEL JOB
+Una volta installato imagick, possiamo installare Spatie nel nostro progetto senza problemi:
+Come da US, il crop delle immagini deve avvenire in modalità asincrona: un lavoro asincrono (job) è un'attività o un processo che viene 
+eseguito in background, separatamente dal flusso principale dell'applicazione. Questo significa che il lavoro non blocca l'utente o altre 
+richieste in attesa di una risposta.
+Creiamo quindi un job dedicato al crop delle immagini:
+Questo comando creerà in app una sottocartella Jobs, contenente il file ResizeImage.php. 
+Le classi Job hanno una struttura abbastanza semplice:
+sfruttano l'OOP, quindi possono avere attributi e il metodo costruttore;
+la logica effettiva del job viene gestita dal metodo handle().
+Iniziamo da attributi e costruttore:
+1composer require spatie/image
+1php artisan make:job ResizeImage
+
+--- PAGE 8 ---
+Abbiamo dichiarato le proprietà private all'interno della classe a riga 1. Le proprietà private sono accessibili solo dal codice della classe 
+stessa e non dagli oggetti esterni:
+$w e $h: memorizzano rispettivamente la larghezza e l’altezza desiderata per la manipolazione dell'immagine
+$fileName: memorizza il nome del file dell'immagine che viene manipolata.
+$path: memorizza il percorso della directory in cui risiede l'immagine.
+public function __construct($w, $h, $filePath): Questa è la funzione costruttore della classe. Viene chiamata ogni volta che 
+viene creata una nuova istanza della classe. Il costruttore accetta tre argomenti:
+$w e $h:  corrispondono rispettivamente alla larghezza e all’altezza desiderata per la manipolazione dell'immagine.
+$filePath:  rappresenta il percorso completo del file immagine che necessita di manipolazione.
+Riga 4: $this->path = dirname($filePath);: estrae il percorso della directory dall'argomento $filePath fornito utilizzando la 
+funzione dirname. Assegna quindi il percorso della directory estratto alla proprietà $path della classe.
+Data una stringa contenente il percorso di un file o di una directory, dirname restituirà il percorso della directory padre che si trova a 
+livelli di distanza dalla directory corrente.
+Riga 5: $this->fileName = basename($filePath);:  estrae il nome del file dall'argomento $filePath fornito utilizzando la funzione 
+basename. Assegna quindi il nome del file estratto alla proprietà $fileName della classe.
+Data una stringa contenente il percorso di un file o di una directory, basename restituisce il nome del file dal percorso indicato
+Riga 6-7: $this->w = $w; e $this->h = $h;: assegnano rispettivamente il valore dell'argomento $w e $h direttamente alle 
+proprietà $w e $h della classe.
+LOGICA DEL JOB
+Modifichiamo quindi il metodo handle():
+
+--- PAGE 9 ---
+Riga 3-4: $w = $this->w; e $h = $this->h; : queste righe assegnano il valore delle proprietà $w e $h della classe alle variabili $w 
+e $h rispettivamente. Queste proprietà memorizzano la larghezza e l'altezza desiderate per l'immagine ritagliata.
+Riga 5: $srcPath = storage_path() . '/app/public/' . $this->path . '/' . $this->fileName; : questa riga costruisce il 
+percorso completo del file immagine originale. Essa utilizza la funzione storage_path() di Laravel per ottenere il percorso della 
+cartella di storage dell'applicazione, e poi aggiunge i percorsi relativi alla sottocartella specificata in $this->path e il nome del file 
+memorizzato in $this->fileName.
+Riga 6: $destPath = storage_path() . '/app/public/' . $this->path . "/crop_{$w}x{$h}_" . $this->fileName; : 
+similmente alla precedente, questa riga costruisce il percorso di destinazione del file immagine ritagliata. È simile al percorso 
+dell'originale, ma aggiunge un prefisso "crop_{w}x{h}_" prima del nome del file originale per indicare le dimensioni di ritaglio. Le 
+parentesi graffe intorno a $w e $h consentono l'interpolazione delle variabili per creare dinamicamente il nome del file.
+Riga 8: Image::load($srcPath)  questa riga utilizza la facciata Image fornita dalla libreria Spatie/Image per caricare l'immagine 
+originale dal percorso $srcPath.
+Riga 9: ->crop($w, $h, CropPosition::Center) - Questo metodo ritaglia l'immagine caricata. Gli argomenti specificano la larghezza 
+($w), l'altezza ($h) e la posizione di ritaglio. In questo caso, viene utilizzato CropPosition::Center per ritagliare l'immagine dal 
+centro.
+Riga 10: ->save($destPath); - infine, salviamo l'immagine ritagliata al percorso di destinazione $destPath.
+Ricordiamoci di importare la classe: 
+Per specificare al nostro ambiente di lavoro che indentiamo lavorare in asincrono e quindi con le code, assicuriamoci che in .env sia scritto 
+quanto segue alla chiave QUEUE_CONNECTION:
+Mi raccomando: replica ESATTAMENTE la sintassi qui presentata.
+
+--- PAGE 10 ---
+Con questa riga di codice stiamo specificando che il job viene memorizzato in una tabella del database e successivamente elaborato da un 
+processo (worker) separato. I worker leggono continuamente questa tabella e recuperano i job da eseguire: questo consente 
+all'applicazione di rispondere immediatamente alla richiesta iniziale e di eseguire il job in background.
+Per creare questa e le altre tabelle che servono ai job per funzionare dobbiamo lanciare il seguente comando:
+AGGIORNAMENTO DELLA LOGICA DI SALVATAGGIO
+Ora che abbiamo impostato la logica del job, dobbiamo specificare quando farlo partire: noi vogliamo che le immagini inserite dall’utente 
+siano automaticamente croppate. 
+Dovremo quindi modificare la funzione store() in CreateArticleForm.php:
+Dopo la creazione in sé dell’articolo, salvato nell’attributo $article della classe, abbiamo modificato ciò che avviene per ciascuna delle 
+immagini inserite dall’utente:
+A riga 14, $newFileName = "articles/{$this->article->id}"; : costruisce il nome del file per l'immagine con la struttura 
+"articles/{id_articolo}".
+Riga 15, $newImage = $this->article->images()->create([...]);: crea un nuovo record collegato all'articolo corrente nella tabella 
+images tramite la relazione one-to-many tra articoli e immagini. Il file dell’immagine viene salvato nello Storage in un percorso che 
+avrà questa struttura: storage/app/public/articles/idArticolo/nomeFile.
+1php artisan queue:table
+
+--- PAGE 11 ---
+Riga 16: dispatch(new ResizeImage($newImage->path, 300, 300));: il metodo dispatch() serve ad inviare un job (ResizeImage 
+in questo caso) ad una coda di lavoro.
+Stiamo quindi creando un nuovo oggetto di classe ResizeImage e passiamo al costruttore i parametri reali: il path dell’immagine 
+appena salvata e le dimensioni che vogliamo per il crop. 
+Riga 18: File::deleteDirectory(storage_path('/app/livewire-tmp')); : elimina la directory temporanea di Livewire, utilizzata per 
+caricare temporaneamente le immagini prima del salvataggio.
+ 
+Siamo quasi pronti per testare.
+ATTIVAZIONE DELLE CODE
+Per attivare le code, e quindi il job, dobbiamo sempre lanciare un comando nel terminale:
+VISUALIZZAZIONE DELLE IMMAGINI
+LOGICA DI VISUALIZZAZIONE
+Ora che abbiamo salvato nello storage le immagini ridimensionate, abbiamo bisogno di costruire dei metodi per consentire di recuperarle 
+facilmente.
+Andiamo quindi nel modello Image.php:
+1php artisan queue:work
+Da questo momento in poi, avremo sempre tre terminali attivi: 
+php artisan serve per il server;
+npm run dev per gli assets;
+php artisan queue:work per mantenere attivi i jobs.
+PER I WINDOWS: per fare in modo che tutto funzioni dobbiamo effettuare una modifica sul file php.ini presente nella cartella di 
+PHP esterna al progetto. Dobbiamo infatti abilitare due estensioni, gd e exif, in questa maniera:
+Ricordiamoci di salvare il file, chiudere i terminali attivi e riattivarli.
+
+--- PAGE 12 ---
+Abbiamo creato due funzioni, analizziamole.
+getUrlByFilePath(), riga 1:
+Funzione statica: Questa funzione è definita come static, il che significa che può essere chiamata direttamente sulla classe senza 
+bisogno di creare un'istanza della classe.
+Parametri:
+$filePath : Il percorso del file dell'immagine memorizzato nell'archiviazione di Laravel.
+$w e $h: rispettivamente, larghezza e altezza desiderate dell'immagine in pixel 
+Logica:
+Riga 3-5: se $w e $h sono entrambi null, la funzione chiama semplicemente Storage::url($filePath) per restituire l'URL 
+dell'immagine originale memorizzata nell'archiviazione.
+Se $w o $h sono specificati, la funzione esegue il seguente codice:
+Riga 6: Estrae la directory e il nome del file dal $filePath originale.
+Riga 8: Costruisce un nuovo percorso del file con il nome crop_{w}x{h}_{filename}, che è la stessa struttura che abbiamo 
+impostato in ResizeImage.
+Riga 9: Restituisce l'URL del percorso del file ritagliato utilizzando Storage::url($file).
+Riassumendo, questa funzione consente di recuperare l'URL di un'immagine memorizzata nell'archiviazione, con la possibilità di 
+ottenere l'URL di una versione ridimensionata dell'immagine fornendo larghezza e altezza desiderate.
+getUrl():
+Verrà richiamata a partire da un oggetto di classe Image
+parametri: $w e $h, rispettivamente, larghezza e altezza desiderate dell'immagine in pixel 
+Logica: richiama la funzione statica appena creata getUrlByFilePath() passandole i parametri reali:
+il path dell’immagine da cui viene fatta partire la funzione stessa
+i parametri $w e $h che a sua volta arrivano in questa funzione quando viene richiamata.
+In sostanza, la funzione getUrlByFilePath fornisce la logica principale per recuperare l'URL dell'immagine, gestendo sia le immagini 
+originali che quelle ritagliate. La funzione getUrlconsente alle istanze di classe immagine di recuperare facilmente l'URL dell'immagine 
+restituita da getUrlByFilePath.
+Andiamo quindi a modificare i file blade che prevedono la visualizzazione delle immagini.
+
+--- PAGE 13 ---
+AGGIORNAMENTO DEL REVISOR INDEX
+Iniziamo da views/revisor/index.blade.php:
+All’interno del foreach che si occupa di ciclare le immagini, al posto del classico Storage::url() stiamo richiamando, a partire dalla 
+singola immagine ciclata, il metodo getUrl appena creato.
+Proseguiamo con le altre pagine.
+AGGIORNAMENTO DELLE CARD
+Mantenendo lo stesso ternario impostato in precedenza, invece che richiamare Storage::url() sulla prima immagine, a partire dalla 
+prima immagine della collezione richiamiamo getUrl() con le stesse dimensioni.
+AGGIORNAMENTO DI ARTICLE SHOW
+In article/show.blade.php avremo quindi una modifica molto simile a quella apportata a revisor/index.blade.php.
+ 
+A questo punto sulla piattaforma potremmo vedere che alcune immagini risultano corrotte: non tutte le immagini salvate nel database a 
+questo punto, infatti, hanno un corrispettivo croppato, e dunque getUrl non potrà recuperarle correttamente.
+Le dimensioni passate a getUrl devono essere le stesse specificate in CreateArticleForm.
+
+--- PAGE 14 ---
+Da User Story ci è però richiesto di vedere tutte le immagini nel sito con la stessa dimensione: essendo ancora in fase di development, 
+possiamo fare il fresh del database. Da questo momento in poi, quindi, tutte le immagini saranno salvate con le dimensioni da noi scelte e, 
+quindi, non avremo nessun problema di visualizzazione.
+Una volta testato tutto, possiamo pushare le modifiche su GitHub.
+1git add .
+2git commit -m "User Story 6 completata"
+3git push

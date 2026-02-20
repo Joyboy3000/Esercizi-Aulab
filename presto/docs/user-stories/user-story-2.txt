@@ -1,0 +1,90 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #2
+User Story #2:
+Come Pino
+vorrei visualizzare gli ultimi annunci sul portale 
+in modo tale da cercare un buon affare
+ACCEPTANCE CRITERIA:                             
+Indice di tutti gli annunci
+Ordine dal più recente al più vecchio
+Visualizzare almeno titolo, prezzo e categoria
+In homepage visualizzare gli ultimi 4-6 annunci
+Ordine dal più recente al più vecchio
+Visualizzare almeno titolo, prezzo e categoria
+Pagina dettaglio dell’annuncio
+Nel dettaglio ci sono N-foto segnaposto come carosello oppure altre soluzioni di web design
+Cliccando su una categoria, voglio vedere la lista degli annunci di quella categoria
+USER STORY #2 - VISUALIZZAZIONE DEGLI ARTICOLI
+VISUALIZZAZIONE ULTIMI ARTICOLI NELLA HOMEPAGE
+Vogliamo fare in modo di vedere in homepage gli ultimi articoli inseriti nella nostra piattaforma, ordinati dal più recente al meno recente.
+Per farlo modifichiamo la funzione che restituisce la vista welcome.blade.php in PublicController.php 
+In questa maniera stiamo passando una variabile $articles contenente gli ultimi 6 articoli caricati in piattaforma alla vista della 
+homepage.
+Possiamo sfruttare questa collezione per generare dinamicamente delle card.
+Per fare ciò creiamo prima di tutto un componente card.blade.php, così da poterlo richiamare in più pagine del nostro sito.
+
+--- PAGE 2 ---
+N.B. card-w è una classe custom, contenente la larghezza desiderata della card.
+Abbiamo aggiunto una classe custom per gestire la dimensione della card e mx-auto per posizionarla automaticamente al centro della 
+colonna.
+Richiamiamo quindi questo componente in una sezione apposita della homepage:
+Attraverso la direttiva @forelse stiamo verificando che la collezione $articles non sia vuota e, in quel caso, la cicliamo per creare 
+dinamicamente una card per ogni oggetto della collezione.
+All’interno del tag <x-card /> stiamo, inoltre, passando l’intero oggetto $article tramite un attributo HTML, con questa sintassi:
+ARTICLE INDEX
+Creiamo ora anche la pagina in cui sarà possibile vedere tutti gli articoli della nostra piattaforma.
+Iniziamo da web.php:
+Scriviamo quindi la funzione:
+1<x-card :article="$article" />
+
+--- PAGE 3 ---
+Alla vista article.index, che andremo a creare tra poco, stiamo passando gli articoli della nostra piattaforma ordinati in ordine 
+decrescente di creazione (dal piu' recente quindi).
+Stiamo inoltre impostando la paginazione della vista: vedremo 6 articoli per pagina.
+Di default, la paginazione di Laravel richiede TailwindCSS, ma puo' funzionare anche con Bootstrap. Per poter sfruttare la paginazione con 
+Bootstrap, dobbiamo specificarlo in AppServiceProvider.php:
+E importiamo la classe:
+Creiamo quindi nella cartella article la vista index.blade.php:
+
+--- PAGE 4 ---
+Il metodo $articles->links() nella paginazione di Laravel genera un insieme di link HTML che gli utenti possono cliccare per navigare 
+tra diverse pagine dei risultati paginati, fornendo un modo intuitivo per sfogliare set di dati.
+Aggiungiamo, infine, un collegamento nella navbar per arrivare rapidamente a questa pagina:
+ARTICLE SHOW
+La card che visualizziamo in homepage e nella pagina di tutti gli articoli ci rimanda a una pagina di dettaglio che dobbiamo ancora creare.
+Partiamo da web.php, dove creiamo una rotta parametrica, che vuole come parametro un oggetto article:
+A questa richiesta get corrisponde una risposta gestita dalla funzione show() in ArticleController.php, che accetta in ingresso un 
+oggetto di classe Article, che passiamo come dato alla vista :
+
+--- PAGE 5 ---
+A questo punto dobbiamo creare la vista article/show.blade.php
+In questa vista avremo quindi a disposizione la variabile $article, contenente il singolo articolo di questa pagina. Possiamo quindi 
+sfruttarla per visualizzare tutte le sue informazioni. Impostiamo anche un carosello (o una qualsiasi altra scelta di design) che ci servirà per 
+le user stories successive: per ora, infatti, non visualizzeremo delle vere immagini, ma solo dei segnaposto.
+Per arrivare a questa vista, modifichiamo l’attributo href dell’anchor riservato a questo scopo nel componente card.blade.php:
+
+--- PAGE 6 ---
+Ricordiamoci di passare il parametro article.
+FILTRO PER CATEGORIA
+Aggiungiamo alla navbar.blade.php un dropdown dedicato a visualizzare tutte le categorie del nostro progetto. A partire da questo 
+dropdown dovremo poter accedere a una vista dedicata a raccogliere tutti gli articoli di quella specifica categoria.
+Stiamo utilizzando !$loop->last per inserire il divisore del dropdown in ogni iterazione del ciclo tranne l’ultima.
+Dobbiamo adesso creare la rotta da collegare a questi link. Anche in questo caso sarà una rotta parametrica, il cui parametro sarà il 
+singolo oggetto di classe Category.
+Creiamo quindi la funzione byCategory() in ArticleController.php:
+Alla vista article/byCategory.blade.php, che creeremo tra poco, stiamo passando due dati:
+gli articoli relazionati alla categoria scelta, in una variabile chiamata $articles;
+
+--- PAGE 7 ---
+la singola categoria, parametro in ingresso nella funzione, in una variabile chiamata $category.
+Creiamo quindi la vista article/byCategory.blade.php
+A questo punto dobbiamo permettere agli utenti di arrivare con facilità a questa tramite gli anchor che abbiamo preimpostato nella navbar e 
+dal componente card.
+Modifichiamo quindi navbar.blade.php, aggiungendo la rotta all’href, ricordandoci di passare il parametro $category:
+E apportiamo una modifica simile al componente card.blade.php:
+
+--- PAGE 8 ---
+Una volta testato tutto, possiamo pushare le modifiche su GitHub.
+1git add .
+2git commit -m "User Story 2 completata"
+3git push

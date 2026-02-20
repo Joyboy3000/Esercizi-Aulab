@@ -1,0 +1,86 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #10
+User story #10
+Come Pino 
+vorrei poter cercare tra gli annunci
+in modo tale da visualizzare subito quello che mi interessa
+ACCEPTANCE CRITERIA:
+Implementazione della ricerca full-text
+Ricerca per titolo
+Ricerca per descrizione
+Ricerca per categoria
+USER STORY #10 - RICERCA FULL-TEXT
+INSTALLAZIONE LARAVEL SCOUT & TNTSEARCH
+La User Story 10 ci richiede di implementare la ricerca full-text all’interno del nostro progetto.
+Per fare ciò iniziamo installando laravel scout con il seguente comando sul terminale:
+Laravel Scout è un pacchetto che permette di aggiungere la funzionalità di ricerca full-text alle applicazioni Laravel che utilizzano modelli 
+Eloquent. In altre parole, aiuta a rendere i tuoi dati ricercabili.
+Pubblichiamo ora il file di configurazione di scout tramite il seguente comando:
+Scout per funzionare ha bisogno di un driver: noi utilizzeremo TNTsearch.
+Installiamolo:
+Una volta finito il processo di installazione iniziato da questo comando, specifichiamo nel file di configurazione di scout prima pubblicato che 
+utilizzeremo TNTsearch e le caratteristiche di cui ha bisogno per funzionare.
+In config/scout.php:
+1composer require laravel/scout
+1php artisan vendor:publish --provider="Laravel\Scout\ScoutServiceProvider"
+1composer require teamtnt/laravel-scout-tntsearch-driver
+
+--- PAGE 2 ---
+Aggiungiamo in .env e in .env.example questa riga di codice:
+In questa maniera stiamo specificando che utilizzeremo Scout con il driver tntsearch.
+TNTsearch per funzionare fa una indicizzazione degli oggetti presenti nel database relativi al modello che vogliamo rendere ricercabile.
+INDICIZZARE GLI ARTICOLI
+Dobbiamo quindi specificare a laravel quale modello vogliamo utilizzare, grazie al trait di Scout Searchable.
+Andiamo in Article.php:
+Lascia il codice originario di scout.php dove nello screen c'è scritto "resto del codice". Fai attenzione alle chiusure dei vari array.
+Mantenendo il codice inalterato, stiamo affermando che un articolo verrà trovato solamente se l'utente ricerca esattamente il nome 
+dell'articolo. Se vogliamo consentire degli errori di battitura modificare riga 8 e scrivere true.
+
+--- PAGE 3 ---
+Sempre nel modello aggiungiamo la funzione toSearchableArray() fornitaci dal trait Searchable. Questa funzione è utilizzata per 
+convertire un'istanza di modello Eloquent in un array che può essere indicizzato da un motore di ricerca full-text.
+ 
+Per creare questo indice dobbiamo lanciare questi comando nel terminale:
+Con $this->category stiamo richiamando la funzione di relazione con Category, non il nome di una colonna nella tabella.
+1php artisan scout:flush "Percorso\Del\Modello"
+2php artisan scout:import"Percorso\Del\Modello"
+
+--- PAGE 4 ---
+Nel nostro caso quindi:
+Per verificare lo stato di indicizzazione possiamo utilizzare questo comando:
+Tramite questi comandi abbiamo quindi costruito l’indice che ci servirà a fare la ricerca nel sito. 
+Dato che stiamo operando con i nostri database in locale, per evitare problemi con gli altri membri del team, ricordiamoci di aggiungere nel 
+file .gitignore questa riga di codice:
+Creiamo, dunque, nella navbar un form per consentire la ricerca:
+1php artisan scout:flush "App\Models\Article"
+2php artisan scout:import "App\Models\Article"
+Il comando php artisan scout:flush rimuove tutti i record di un modello da un indice di ricerca; il comando php artisan 
+scout:import invece importa tutti i record di un modello in un indice di ricerca.
+Se effettui delle modifiche al modello indicizzato con scout, ricordati di lanciare in sequenza questi due comandi.
+1php artisan scout:status
+Questo passaggio e' FONDAMENTALE: dimenticarsene vuol dire affrontare merge su merge per tutto il resto del progetto.
+Inserire /storage/*.index all’interno del file .gitignore e' anche una forma di protezione: all’interno degli indici, infatti, 
+potrebbero esserci dei dati sensibili.
+Per far sì che Scout funzioni, il name associato all’input deve essere necessariamente query.
+
+--- PAGE 5 ---
+LOGICA DI RICERCA DEGLI ARTICOLI
+Creiamo ora la rotta per effettuare la ricerca:
+E la sua funzione:
+La funzione Laravel\Scout\Searchable::search è il metodo principale per eseguire ricerche sui dati indicizzati del modello in Laravel 
+Scout, quindi nel nostro caso sul modello Article. Consente di interrogare il motore di ricerca e recuperare risultati pertinenti in base al 
+termine di ricerca dell'utente.
+All’interno del metodo search() stiamo passando l’input dell’utente in chiave query, ovvero il name dell’input del form di ricerca, che 
+abbiamo salvato nella variabile $query.
+Filtriamo poi il risultato della search e restituiamo in una collezione solo gli articoli già accettati dal revisore. divisi per pagine.
+Alla vista stiamo passando quindi gli articoli risultanti dalla ricerca e la ricerca in sé effettuata dall’utente.
+Creiamo, quindi, article/searched.blade.php:
+
+--- PAGE 6 ---
+Infine, aggiungiamo l' action al form di ricerca nella navbar:
+ 
+Così facendo abbiamo finito tutta la logica necessaria al funzionamento della ricerca full-text nel progetto.
+Una volta testato tutto, possiamo pushare le modifiche su GitHub.
+1git add .
+2git commit -m "User Story 10 completata"
+3git push

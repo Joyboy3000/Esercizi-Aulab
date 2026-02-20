@@ -1,0 +1,248 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #3
+User story #3:
+Come Pablo
+vorrei poter collaborare col team Presto
+in modo tale da poter avere un’entrata extra.
+ACCEPTANCE CRITERIA:
+Un utente registrato viene reso revisore tramite un comando d'automazione
+I revisori possono accedere ad una sezione a loro dedicata
+Lista di annunci da revisionare 
+Da visualizzare uno alla volta, dal meno recente
+Bottone accetta annuncio
+Bottone rifiuta annuncio
+Creare una vista "lavora con noi" in cui l’utente registrato, tramite un form, richiede di diventare revisore e al submit far partire una mail 
+con i dettagli della richiesta
+EXTRA:
+Permetti a un revisore di annullare l'ultima operazione effettuata
+USER STORY #3 - UTENTI REVISORI
+CREAZIONE DEL RUOLO REVISORE
+MIGRAZIONE
+Vogliamo permettere a un utente di diventare revisore del nostro sito.
+Per fare ciò abbiamo bisogno di creare una logica per gestire i ruoli dei nostri utenti: nel nostro caso, aggiungeremo una nuova colonna alla 
+tabella users, in cui salveremo se il singolo utente sia revisore o meno.
+Creiamo quindi una nuova migrazione:
+Con questo comando stiamo creando una nuova migrazione, il cui scopo sarà aggiungere alla già esistente tabella users una nuova 
+colonna, chiamata is_revisor.
+Gestiamo quindi la migrazione:
+1php artisan make:migration add_is_revisor_column_to_users_table
+
+--- PAGE 2 ---
+Nella funzione up() stiamo effettivamente creando la colonna is_revisor:
+accetterà un dato di tipo booleano;
+di default l’utente non sarà revisore, quindi questa colonna sarà popolata con false.
+Nella funzione down() stiamo facendo l’inverso di up(), e quindi droppiamo la colonna appena creata.
+Lanciamo quindi le migrazioni
+CREAZIONE DI UN COMANDO D’AUTOMAZIONE
+A questo punto dobbiamo fare in modo che si possa rendere un utente revisore, salvando, quindi, nella colonna appena creata il valore 
+true, tramite un comando di automazione.
+Oltre ai comandi già forniti da artisan, possiamo, infatti, creare dei comandi personalizzati in base alle nostre necessità
+Per creare un comando lanciamo nel terminale:
+In questa maniera avremo all’interno di app delle nuove sottocartelle: Console\Commands, all’interno della quale troveremo il nostro file 
+MakeUserRevisor.php.
+All’interno di questo file per prima cosa dobbiamo modificare l’attributo $signature, che consente di definire nome, parametri e opzioni del 
+comando vero e proprio appena creato.
+1php artisan migrate
+2php artisan migrate:rollback
+3php artisan migrate
+1php artisan make:command MakeUserRevisor
+
+--- PAGE 3 ---
+Nel nostro caso scriviamo:
+In questa maniera stiamo dicendo che per far partire questo comando, di cui ora specificheremo la funzionalità, andrà scritto nel terminale 
+questa riga php artisan app:make-user-revisor seguita dal parametro email.
+Nell’attributo $description scriviamo una breve descrizione di ciò che farà il comando.
+Per controllare che le nostre modifiche siano andate a buon fine e il comando sia stato registrato correttamente tra quelli del nostro 
+applicativo, possiamo lanciare sul terminale:
+In questa maniera vedremo l’elenco di tutti i comandi disponibili, compreso il nostro, in questa maniera:
+Infine, modifichiamo il metodo handle(), ovvero la funzione che partirà quando questo comando verrà richiamato.
+Ricordiamoci di importare la classe App\Models\User.
+Cosa facciamo nel codice:
+a riga 4, effettuiamo la ricerca dell'utente associato all'email specificata tramite il parametro email.
+a riga 5, in caso di mancata corrispondenza nella tabella users, la funzione termina con un messaggio di errore.
+A riga 9, se l'utente viene trovato, il suo record viene aggiornato conferendogli lo stato di revisore.
+Per testare, possiamo lanciare nel terminale:
+GESTIONE DELLO STATO DEGLI ARTICOLI
+Avendo ora la logica per rendere un utente revisore, dobbiamo effettuare delle modifiche che riguardano, invece, l’entità degli articoli. Il 
+revisore, dovrà, infatti, accettare o rifiutare gli articoli: dovremo quindi aggiungere una colonna alla tabella articles in cui salvare lo 
+1protected $signature = 'app:make-user-revisor {email}';
+1protected $description = 'Rende un utente revisore';
+1php artisan
+1php artisan app:make-user-revisor <emailUtente>
+“emailUtente” è solo un segnaposto, testate con delle mail presenti nel vostro database.
+
+--- PAGE 4 ---
+stato di accettazione del singolo articolo.
+Per fare ciò creiamo quindi una nuova migrazione:
+In questa migrazione creeremo, quindi, una nuova colonna is_accepted nonché la logica per dropparla in caso di rollback.
+in add_is_accepted_column_to_articles_table.php
+E lanciamo la migrazione 
+DASHBOARD DEI REVISORI
+CREAZIONE DELLA DASHBOARD
+Siccome nel corso del progetto svilupperemo molta logica riguardante i revisori, ha quindi senso avere un controller dedicato. 
+Creiamolo nel terminale:
+Il revisore avrà bisogno di un’area riservata dove poter vedere gli articoli da revisionare e da qui accettarli o rifiutarli.
+Partiamo da web.php:
+Ricordiamoci di importare la classe del controller.
+1php artisan make:migration add_is_accepted_column_to_articles_table
+L’idea e' che nel campo is_accepted ci possano essere solo tre valori:
+null, se l’articolo è ancora da revisionare;
+true, se l’articolo è stato accettato;
+false, se l’articolo è stato rifiutato.
+1php artisan migrate
+2php artisan migrate:rollback
+3php artisan migrate
+1php artisan make:controller RevisorController
+
+--- PAGE 5 ---
+Creiamo la funzione in RevisorController:
+Ricordiamoci di importare la classe Article.php.
+In $article_to_check stiamo salvando il primo articolo che corrisponde a questa richiesta: avere nella colonna is_accepted il dato 
+null, e passiamo questo dato alla vista che ora creiamo.
+Nella cartella views impostiamo infatti una sottocartella revisor, con all’interno un file chiamato index.blade.php.
+ In view/revisor/index.blade.php:
+
+--- PAGE 6 ---
+Analizziamo il codice:
+A riga 12 impostiamo un controllo: c'è un articolo da revisionare?
+Se sì, il revisore vedrà:
+6 immagini segnaposto, che nelle prossime US saranno sostituite da immagini effettive;
+I dettagli dell’articolo;
+A riga 35-42, abbiamo impostato due form: uno per accettare e l’altro per rifiutare l’articolo, ma come vediamo abbiamo lasciato 
+method e action vuoti.
+Altrimenti (riga 47-54) vedrà “Nessun articolo da revisionare” e sarà rimandato all’homepage da un bottone.
+Iniziamo a strutturare la logica di accettazione o rifiuto degli articoli.
+LOGICA DI VALUTAZIONE ARTICOLI
+Andiamo nel modello Article.php:
+
+--- PAGE 7 ---
+Cosa stiamo facendo:
+del singolo articolo prendiamo l’attributo is_accepted e lo valorizziamo con il valore in ingresso.
+Creiamo le rotte per permettere al revisore di accettare o rifiutare un articolo.
+LOGICA DI ACCETTAZIONE ARTICOLO
+In web.php:
+Ricordiamoci di importare la classe del controller.
+Come vediamo abbiamo utilizzato il metodo patch per fare una rotta che accetta un parametro, article.
+In HTTP, una rotta PATCH serve ad aggiornare una risorsa esistente in modo parziale. Questo significa che puoi inviare una richiesta 
+PATCH con solo i dati che vuoi modificare, e Laravel aggiornerà la risorsa nel database di conseguenza.
+Le rotte PATCH sono utili quando si vuole aggiornare solo uno o due campi di una risorsa, invece di dover inviare l'intero oggetto con tutti i 
+dati.
+Andiamo quindi in RevisorController.php per creare la funzione accept() appena richiamata:
+
+--- PAGE 8 ---
+Analizziamo il codice:
+La funzione accept accetta in ingresso il parametro $article che con Dependency Injection sarà necessariamente un oggetto di 
+classe Article;
+a riga 3, partendo da questo singolo articolo, invochiamo il metodo setAccepted creato pocanzi, passando come argomento reale 
+true;
+Infine salviamo le modifiche appena apportate all’articolo.
+Stiamo quindi modificando il singolo articolo in revisione segnandolo come accettato.
+LOGICA DI RIFIUTO ARTICOLI
+Dobbiamo adesso creare la stessa logica per permettere al revisore di rifiutare l’articolo. Partiamo da web.php:
+E creiamo la funzione relativa in RevisorController:
+Come vediamo la logica è uguale alla funzione precedente, con la differenza che stiamo passando false come parametro alla funzione 
+setAccepted().
+DARE LA POSSIBILITA' AL REVISORE DI ACCETTARE O RIFIUTARE UNO SPECIFICO ARTICOLO
+Modifichiamo, quindi, revisor/index.blade.php, aggiornando i form con le rotte appena create in questa maniera:
+
+--- PAGE 9 ---
+Ricordiamoci di specificare con la direttiva blade @method che il metodo delle rotte è, in realtà, PATCH.
+Sempre in revisor/index.blade.php aggiungiamo anche lo snippet di codice per poter vedere il messaggio di avvenuta accettazione o 
+rifiuto dell’articolo:
+A questo punto aggiungiamo nella navbar il collegamento per arrivare all’area del revisore:
+Come vediamo, stiamo controllando se l’utente autenticato abbia il ruolo revisor all’interno del già esistente controllo fatto da @auth.
+CONTEGGIO DEGLI ARTICOLI DA REVISIONARE
+Ora vogliamo far visualizzare al revisore una notifica con il numero degli articoli da revisionare. Creiamo quindi una funzione che conti gli 
+articoli non ancora revisionati.
+
+--- PAGE 10 ---
+Nel modello Article.php:
+Cosa stiamo facendo:
+toBeRevisedCount() è un metodo statico: sarà invocato a partire dalla classe stessa Article;
+facciamo una query al database: della tabella articles prendiamo solo gli articoli che nella colonna is_accepted hanno il dato null. 
+Questa query restituirà una collezione;
+A partire da questa collezione facciamo partire il metodo count() per contare gli articoli non ancora revisionati e restituire il conteggio 
+come valore di output della funzione.
+Vogliamo far visualizzare questo numero a mo' di notifica sulla navbar. Andiamo quindi a modificare quanto impostato in precedenza:
+ 
+Abbiamo quindi aggiunto uno span contenente il numero restituito dalla funzione appena creata, che sarà visibile in alto a destra 
+sull'anchor che porta alla zona revisore.
+Possiamo facilmente notare, però, che, tramite l’uri, anche un utente non revisore può accedere alla dashboard. Dobbiamo quindi 
+proteggerla tramite un middleware.
+IMPEDIRE L'ACCESSO A UTENTI NON REVISORI
+Creiamo un middleware custom con il comando nel terminale:
+Il middleware appena generato si troverà all’interno del percorso app\Http\Middleware.
+Andiamo quindi a modificarlo in questa maniera:
+Ricorda: questo metodo count() e' un metodo delle collezioni. Non confonderlo con la built-in function count() di PHP. Quando 
+lavoriamo su Laravel, preferiamo sempre utilizzare i suoi metodi ed helpers.
+1php artisan make:middleware IsRevisor
+
+--- PAGE 11 ---
+Analizziamo il codice:
+a riga 7, se l’utente è autenticato E ANCHE revisore, potrà proseguire con la richiesta (ovvero visualizzare la dashboard del revisor);
+a riga 10, invece, diciamo che in tutti gli altri casi sarà reindirizzato alla homepage con un messaggio di errore.
+Aggiungiamo quindi nella welcome.blade.php lo snippet per vedere il flash message:
+Perché il middleware funzioni, però, dobbiamo registrarlo in bootstrap/app.php in questa maniera:
+Ricordandoci di importare la classe App\Http\Middleware\IsRevisor.
+Infine, specifichiamo alla rotta della dashboard del revisore che deve essere protetta dal middleware con alias isRevisor:
+
+--- PAGE 12 ---
+RICHIESTA PER DIVENTARE REVISORI
+CREAZIONE DEL MAILABLE
+Adesso diamo la possibilità a un utente autenticato di fare domanda per diventare revisore.
+L’idea è avere nel footer, o dove preferiamo, un bottone che faccia partire una mail all’amministratore del sito con i dati dell’utente che ha 
+fatto richiesta. Da questa mail l’amministratore potrà decidere se rendere l’utente revisore o no.
+Creiamo, dunque, questa mail:
+Come sappiamo, questo comando crea una classe figlia della Mailable, che troveremo nel percorso app\Mail.
+Dunque, in app\Mail\BecomeRevisor:
+Cosa stiamo facendo:
+1php artisan make:mail BecomeRevisor
+
+--- PAGE 13 ---
+a riga 7, abbiamo l'unico attributo, $user, ovvero l’utente che ha fatto richiesta di diventare revisore. Questa variabile sarà 
+automaticamente disponibile sulla vista della mail inviata all’admin;
+a riga 14, la funzione envelope, letteralmente “busta”, viene utilizzata per impostare le informazioni sull'intestazione di posta elettronica 
+per la mail da inviare. Queste informazioni includono il mittente, il destinatario e, nel nostro caso, l'oggetto della mail;
+Nella funzione content(), a riga 24, stabiliamo il contenuto della mail, quindi che vista deve essere materialmente spedita all’admin. 
+Dobbiamo ora quindi creare in views una sottocartella chiamata mail e al suo interno la vista become-revisor.blade.php. 
+Facciamolo subito.
+Per poter successivamente testare questa mail, ricordiamoci di copiare le nostre credenziali di Mailtrap e inserirle nel .env in questa 
+maniera:
+
+--- PAGE 14 ---
+LOGICA DI INVIO MAIL
+Creiamo ora la logica per far partire questa mail e, quindi, la richiesta dell’utente di diventare revisor.
+Partiamo dalla rotta in web.php:
+Come vediamo la rotta è protetta dal middleware auth.
+Scriviamo, quindi, la funzione becomeRevisor() in RevisorController:
+Ricordiamoci di importare le classi:
+E di impostare nella welcome lo snippet per visualizzare il flash message:
+Usa il bottone “Copy” per copiare le credenziali, altrimenti non verranno copiate correttamente.
+
+--- PAGE 15 ---
+Per testare aggiungiamo nel footer il bottone per far partire questa logica:
+CREAZIONE DELLA ACTION NELLA MAIL
+Nella mail, a riga 18, abbiamo inserito il richiamo a una rotta make.revisor che non abbiamo ancora creato. Questa rotta servirà a rendere 
+effettivamente un utente revisore. Creiamola adesso in web.php:
+In RevisorController.php scriviamo quindi la funzione collegata:
+Ricordiamoci di importare le classi:
+
+--- PAGE 16 ---
+Tramite la classe Artisan stiamo facendo partire il comando MakeUserRevisor creato precedentemente, a cui passiamo la mail 
+dell’utente.
+Modifichiamo, infine, become-revisor.blade.php aggiungendo il collegamento alla rotta appena creata:
+  
+VISUALIZZAZIONE LIMITATA AGLI ARTICOLI ACCETTATI
+Infine, dato che ora abbiamo articoli che possono essere accettati o meno, facciamo in modo che in piattaforma siano visibili solo gli articoli 
+già accettati da un revisore.
+Andiamo dunque a modificare le varie queries.
+Partiamo dagli articoli presenti in homepage, modificando quindi la funzione homepage() in PublicController.php:
+
+--- PAGE 17 ---
+Modifichiamo anche la funzione index() in ArticleController.php:
+E, infine, la funzione byCategory() in ArticleController.php:
+Una volta testato tutto, possiamo pushare le modifiche su GitHub.
+Assicuriamoci che in ogni vista disponibile al pubblico ci siano solo articoli accettati.
+1git add .
+2git commit -m "User Story 3 completata"
+3git push

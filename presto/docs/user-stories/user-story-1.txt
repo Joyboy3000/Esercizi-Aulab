@@ -1,0 +1,337 @@
+--- PAGE 1 ---
+PRESTO L11 - USER STORY #1
+User Story #1:
+Come Linda 
+vorrei registrarmi in piattaforma per inserire un annuncio, 
+in modo tale da liberarmi degli oggetti che non mi piacciono più.
+ACCEPTANCE CRITERIA:
+Un Annuncio dev’essere formato almeno da:
+Titolo
+Prezzo
+Descrizione
+Questi campi sono necessari
+Per ora non gestire foto o altri file
+Logica di autenticazione
+Login
+Registrazione
+Solo gli utenti loggati possono inserire un annuncio
+Dopo register o login, subito redirect a "inserisci annuncio"
+Categorie dell'annuncio pre-compilate
+10 categorie sono sufficienti
+Bottone “inserisci annuncio“ in home
+La relazione tra Categoria e Annuncio è  1 a N
+La relazione tra Utente e Annuncio è 1 a N
+Utilizzo di Laravel Livewire per l'inserimento dell'annuncio
+Ad annuncio inserito visualizzare un messaggio di conferma
+ 
+LEGENDA:
+SCAFFOLDING
+CREAZIONE DEL PROGETTO
+Creiamo un nuovo progetto:
+Informazioni e approfondimenti sul codice scritto o sulle best practices.
+Leggi sempre gli avvertimenti: possono evitarti un sacco di problemi!
+Consigli del docente per semplificarti la vita.
+1laravel new presto_cognome1_cognome2...
+
+--- PAGE 2 ---
+Prima di proseguire con la creazione del progetto visualizzeremo diverse domande sul terminale.
+Ci chiederà se vogliamo installare uno starter kit, selezioniamo l’opzione di default “no starter kit”:
+Ci chiederà quale framework di testing vogliamo utilizzare, selezioniamo “PHPUnit”:
+Ci chiederà se vogliamo inizializzare una Git repository, selezioniamo “no”:
+Chiederà se vogliamo pubblicare tutti i file di configurazione di laravel, selezioniamo “no”:
+Chiederà che database utilizzeremo nella nostra applicazione, selezionare “MySQL”:
+A questo punto chiederà se vogliamo lanciare le migrazioni di default, selezionare “no” in quanto non abbiamo ancora creato e collegato un 
+database al progetto.
+Abbiamo così creato il nostro progetto laravel.
+Per poter iniziare a lavorare ricordiamoci di entrare nella cartella del progetto creata dal comando laravel new:
+A questo punto dobbiamo creare la repository del progetto su GitHub.
+Una volta entrat* nella Organizzazione della vostra Hackademy selezionate “New Repository”
+Date un nome alla repository e create la repository
+A questo punto selezioniamo il setup con chiave SSH
+1cd presto presto_cognome1_cognome2...
+
+--- PAGE 3 ---
+E eseguiamo i comandi suggeriti da GitHub:
+ 
+Dopo aver inizializzato la repository apriamo il progetto da terminale su visual studio code:
+CREAZIONE E COLLEGAMENTO DEL DATABASE
+Sempre da terminale, creiamo il database che collegheremo al progetto.
+Per accedere al terminale di MySQL da windows:
+Mandare invio ed inserire la password (root).
+Per mac:
+Mandare invio e inserire la password (root o per i mac rootroot).
+Una volta ottenuta questa schermata creiamo il database con il comando:
+E chiudere MySQL con quit o exit.
+Una volta creato il database possiamo collegarlo al progetto. Aggiorniamo quindi i dati riguardanti il database nel file .env
+1git init
+2git add .
+3git commit -m "Start del progetto"
+4git branch -M main
+5git remote add origin git@github.com:<codice>
+6git push -u origin main
+1code .
+1winpty mysql -u root -p
+1mysql -u root -p
+1create database nome_database;
+
+--- PAGE 4 ---
+E lanciamo le migrazioni di default con il comando nel terminale:
+Per visualizzare facilmente il database creiamo la connessione su TablePlus. Una volta aperta l’applicazione cliccare sul + o su “create a 
+new connection” e selezionare MySQL.
+A questo punto compilare i campi della finestra come nell’immagine, sostituendo alle scritte segnaposto il nome del database che avete 
+appena creato:
+Verificare che la connessione sia andata a buon fine cliccando sul tasto “Test” in basso al centro.
+Se avete ottenuto questa finestra cliccate in basso a destra il tasto “Connect”.
+BUNDLING DEGLI ASSETS
+Una volta aver terminato queste operazioni, torniamo su visual studio code e creiamo il PublicController, in cui andremo a racchiudere la 
+logica “generica” del progetto.
+Lanciamo quindi nel terminale il comando:
+ 
+Andiamo quindi sul file web.php nella cartella routes e aggiorniamo la rotta in questa maniera:
+1php artisan migrate
+1php artisan make:controller PublicController
+
+--- PAGE 5 ---
+Ricordiamoci di importare la classe use App\Http\Controllers\PublicController;
+Spostiamo quindi la logica relativa a questa rotta in PublicController.php; :
+Per poter utilizzare Bootstrap nel nostro progetto senza dover sfruttare le CDN installiamolo grazie al package manager npm, lanciando nel 
+terminale il comando:
+Questo comando creerà la cartella node_modules con all'interno la cartella con tutti i file che servono a bootstrap per funzionare.
+Spostiamoci nella cartella resources/css e creiamo un file per il nostro stile, style.css.
+Nel file resources/css/app.css importiamo il nostro foglio di stile e bootstrap:
+Spostiamoci poi in resources/js/ e creiamo un nuovo file javascript script.js.
+Aggiorniamo poi il file app.js:
+1npm i bootstrap
+Attenzione allo spelling del pacchetto! E' facile scrivere male per la fretta (es. boostrap)
+
+--- PAGE 6 ---
+COMPONENTI DI UI
+A questo punto possiamo iniziare a creare i componenti che utilizzeremo nel nostro progetto.
+Per farlo creiamo nel percorso resources/views una sottocartella chiamata esattamente components. Qui creiamo il file 
+layout.blade.php, in cui inseriremo la cornice html del nostro lavoro, il componente navbar.blade.php e il componente 
+footer.blade.php.
+Nel file navbar.blade.php incolliamo una navbar da bootstrap e modifichiamola secondo le nostre esigenze.
+Nel file footer.blade.php creiamo un footer.
+ 
+In layout.blade.php inserire nel tag head la direttiva blade @vite(), che accetta in ingresso un array con il percorso dei file app.css e 
+app.js che abbiamo appena modificato.
+Modificare il contenuto del tag title, richiamare il componente navbar.blade.php, footer.blade.php e inserire un div con un’altezza 
+minima che contenga la pseudo-variabile $slot.
+Il footer e' sempre un po' ostico da fare. Possiamo prendere spunto dal sito MDB o da altre risorse online.
+
+--- PAGE 7 ---
+A questo punto modifichiamo la vista welcome.blade.php cancellandone il contenuto di default e richiamando il layout.
+Per poter visualizzare le modifiche e fare il bundling degli assets lanciare in un terminale il comando:
+e in un altro avviamo il server:
+Ricordiamoci di mantenere questi due terminali sempre attivi.
+1npm run dev
+1php artisan serve
+
+--- PAGE 8 ---
+USER STORY #1 - AUTHENTICATION E CREAZIONE ARTICOLO
+AUTENTICAZIONE
+INSTALLAZIONE DI LARAVEL FORTIFY
+Per l’autenticazione, utilizzeremo la libreria Laravel Fortify.
+Per installarla lanciamo i seguenti comandi:
+Pubblichiamo le risorse di fortify:
+Questo comando pubblicherà le actions di Fortify nella directory app/Actions. Inoltre, verranno pubblicati FortifyServiceProvider, il 
+file di configurazione e tutte le migrazioni del database necessarie al funzionamento di fortify.
+Fortify ci fornirà tutta la logica di backend (funzioni e rotte) di cui abbiamo bisogno per gestire l’autenticazione degli utenti. Per visualizzare 
+le rotte del nostro progetto, comprese quelle fornite da fortify, possiamo lanciare nel terminale il comando
+A questo punto migriamo il database:
+Dobbiamo indicare a Fortify come restituire la nostra vista di login. La logica di rendering delle viste di autenticazione va richiamata nel 
+metodo boot() di App\Providers\FortifyServiceProvider.php
+1composer require laravel/fortify
+1php artisan fortify:install
+1php artisan route:list
+rotte di fortify che utilizzeremo
+1php artisan migrate
+
+--- PAGE 9 ---
+Tramite la classe Fortify, abbiamo quindi specificato come restituire le due viste di login e registrazione, che dobbiamo ora creare.
+In resources/views creiamo la sottocartella auth con all’interno i due file:
+login.blade.php
+register.blade.php
+LOGIN
+Iniziamo da resoruces/views/auth/login.blade.php.
+Dopo aver impostato il layout di base e il grid system, inseriamo nella vista un form per il login. Il form, per funzionare correttamente, dovrà 
+contenere questi elementi, come specificato nella documentazione:
+attributo method, in cui specifichiamo il metodo della richiesta POST;
+attributo action, in cui specifichiamo l'endpoint della richiesta, ovvero la rotta login;
+il csrf token;
+due input:
+uno di tipo email con name email;
+uno di tipo password con name password;
+un bottone di tipo submit
+Nota: la classe height-custom è una classe custom predisposta per dare un’altezza prestabilita alla row. Potete modificarla in base alle 
+vostre esigenze di frontend.
+
+--- PAGE 10 ---
+REGISTER
+Ora gestiamo la vista di registrazione resoruces/views/auth/register.blade.php.
+Il form di registrazione avrà bisogno, come quello di login, del method="POST", del @csrf e del bottone di submit.
+Diversamente dal login, invece:
+l’endpoint della richiesta sarà la rotta register, come specificato dalla documentazione;
+quattro input:
+uno di tipo text con name name;
+uno di tipo email con name email;
+uno di tipo password con name password;
+uno di tipo password con name password_confirmation;
+Mi raccomando, il name dev’essere necessariamente password_confirmation. Ricordati di inserire la visualizzazione degli errori 
+di validazione nei form.
+
+--- PAGE 11 ---
+A questo punto inseriamo nella navbar una zona riservata all’autenticazione e agli utenti, per arrivare facilmente alle viste dedicate.
+
+--- PAGE 12 ---
+Attraverso le direttive blade @auth/@else/@endauth stiamo differenziando cosa vedranno gli utenti in base al loro stato di autenticazione: 
+solo un utente guest vedrà i link per arrivare alla pagina di registrazione e login.
+Prima di testare queste rotte e gestire la logica di logout, modifichiamo il reindirizzamento che segue le operazioni di autenticazione (login, 
+register e logout).
+Per farlo, dobbiamo modificare il file di configurazione fortify.php alla chiave “home” in questa maniera:
+Così facendo l’utente sarà automaticamente reindirizzato alla homepage dopo aver eseguito qualsiasi operazione di autenticazione.
+LOGOUT
+Gestiamo ora la logica di logoutnella parte di navbar protetta dalla direttiva auth.
+1'home' => '/',
+
+--- PAGE 13 ---
+CREAZIONE DELLE CATEGORIE
+MODELLO & MIGRAZIONE
+Per avere a disposizione nel nostro progetto delle categorie preimpostate da poter collegare agli articoli, come richiesto dalla User Story #1, 
+dobbiamo creare modello e migrazione di una entità che chiamiamo Category con il seguente comando:
+Gestiamo quindi il modello Category.php:
+A questo punto gestiamo la migrazione:
+1php artisan make:model Category -m
+
+--- PAGE 14 ---
+E lanciamo la migrazione
+SEEDING DELLE CATEGORIE
+Avendo creato la tabella categories, popoliamola di dati grazie al DatabaseSeeder.php.
+1php artisan migrate
+2php artisan migrate:rollback
+3php artisan migrate
+
+--- PAGE 15 ---
+A riga 6, abbiamo creato un attributo pubblico $categories contenente un array con le categorie che vogliamo avere nel nostro sito (quelle 
+qui elencate sono degli esempi).
+Successivamente, a riga 19, nella funzione run() per ognuna delle categorie elencate nell’array creiamo un oggetto di classe Category. 
+Ricordiamoci di importare il modello App\Models\Category.php.
+Per invocare la funzione run() lanciare nel terminale il comando:
+CATEGORIE GLOBALMENTE DISPONIBILI
+Siccome vogliamo che le categorie siano disponibili in ogni pagina del nostro sito, condividiamole nella funzione boot() di 
+app\Providers\AppServiceProvider.php:
+1php artisan db:seed
+
+--- PAGE 16 ---
+In questa maniera stiamo controllando che esista la tabella categories e, di conseguenza, condividiamo con le viste del nostro progetto 
+una variabile $categories, contenente la collezione delle categorie presenti nel nostro database, riordinate in ordine alfabetico.
+Non dimentichiamoci di importare le classi:
+ 
+CREAZIONE DI UN ARTICOLO
+MODELLO E MIGRAZIONE
+A questo punto possiamo creare la nostra entità Article. Per farlo lanciamo nel terminale il comando:
+In questa maniera creeremo contemporaneamente modello, migrazione e controller di Article sfruttando perfettamente le convenzioni di 
+laravel.
+Gestiamo quindi il modello Article.php:
+Se non vuoi che le tue categorie siano in ordine alfabetico, ti bastera' sostituire la query Category::orderBy('name')->get() con 
+Category::all().
+1php artisan make:model Article -mc
+
+--- PAGE 17 ---
+Nell’attributo protected $fillable inseriamo tutte le proprietà che vogliamo caratterizzino il nostro articolo, nel nostro esempio titolo, 
+descrizione, prezzo, nonché category_id e user_id, che ci serviranno per gestire le relazioni 1-N rispettivamente con Category e con User.
+Partendo da questa base gestiamo la migrazione:
+E lanciamo la migrazione
+1php artisan migrate
+2php artisan migrate:rollback
+3php artisan migrate
+
+--- PAGE 18 ---
+RELAZIONI
+Terminiamo le relazioni scrivendo le funzioni di relazione.
+In nei modelli User.php e Category.php scriviamo:
+E importiamo le classi:
+In Article.php:
+E importiamo la classe:
+
+--- PAGE 19 ---
+ARTICLE CREATE
+Adesso possiamo gestire la logica di creazione di un articolo.
+Per creare un articolo, un utente autenticato dovrà accedere a una vista dedicata. Creiamo quindi una rotta con metodo get che ci porti qui, 
+in web.php:
+Ricordiamoci di importare il controller.
+In ArticleController.php creiamo la funzione appena richiamata:
+Avremo quindi bisogno di creare in resources/views una sottocartella article contenente una vista, denominata create.blade.php.
+
+--- PAGE 20 ---
+Come vediamo, stiamo richiamando un componente livewire che non abbiamo ancora creato. Facciamolo subito.
+Per installare livewire lanciamo il comando nel terminale oppure possiamo seguire la documentazione:
+Creiamo quindi il componente livewire che useremo per creare gli articoli:
+Questo comando creerà una classe app/Livewire/CreateArticleForm.php e una vista ad essa collegata views/livewire/create-
+article-form.blade.php.
+Gestiamo prima la vista create-article-form.blade.php:
+Avremo un form con tanti input/textarea quanti sono gli attributi del nostro Article.php.
+Le sintassi <livewire:create-article-form /> e @livewire('create-article-form') si equivalgono
+1composer require livewire/livewire
+1php artisan make:livewire CreateArticleForm
+
+--- PAGE 21 ---
+Siccome utilizzeremo livewire per la creazione degli articoli non abbiamo bisogno di specificare action, method e name.
+Invece dei name, stiamo utilizzando l'html directive di livewire wire:model: questa direttiva consente di fare il data binding automatico con 
+le proprietà del componente livewire che adesso imposteremo.
+SALVATAGGIO IN DATABASE
+Gestiamo quindi la classe CreateArticleForm.php.
+Abbiamo quindi creato una proprietà pubblica per ogni attributo di Article che dobbiamo salvare nel database, e uno che serve a 
+rappresentare l’articolo creato in sé.
+
+--- PAGE 22 ---
+In Livewire 3, l'attributo #[Validate] consente di definire le regole di validazione direttamente sulle proprietà di un componente. Questo 
+permette di effettuare la validazione in tempo reale, ovvero non appena l'utente modifica il valore di una proprietà.
+Se vogliamo personalizzare i messaggi di validazione possiamo richiamare il metodo messages() di livewire 3 che restituisce sempre un 
+array chiave valore con i nostri messaggi.
+Nella funzione store() richiamiamo il metodo validate() per verificare che le regole che abbiamo settato siano rispettate prima di 
+proseguire. A questo punto proseguiamo nella creazione vera e propria dell’articolo.
+ERRORI DI VALIDAZIONE
+Per testare e visualizzare eventuali errori di compilazione modifichiamo il form:
+Abbiamo aggiunto:
+riga 1: wire:submit="store", la direttiva di livewire che consente di far partire la funzione store() al submit del form
+le direttive @error e @enderror per visualizzare gli errori di validazione.
+Come vediamo, i wire:model hanno il modificatore .blur, così da vedere l’errore non solo al click del bottone di submit, ma anche 
+quando l’utente clicca fuori dall’input senza aver rispettato tutte le regole.
+Alternativamente, è possibile utilizzare il modificatore .live per vedere le modifiche in tempo reale, o .debounce, per vedere le modifiche 
+dopo un tempo da noi settato.
+FEEDBACK VISIVO ALL’UTENTE
+Per completare il lavoro di creazione, facciamo in modo che una volta finito il submit i campi del form siano svuotati automaticamente e che 
+l’utente visualizzi un messaggio di avvenuta creazione.
+Per svuotare i campi del form, possiamo aggiungere alla fine della funzione store() il metodo reset():
+1$this->reset();
+
+--- PAGE 23 ---
+Alternativamente possiamo creare un metodo custom:
+ 
+Da richiamare sempre alla fine della funzione store():
+Per dare all’utente riscontro visivo dell'avvenuta creazione aggiungiamo alla funzione store() anche questa riga di codice:
+Per poter visualizzare questo messaggio modifichiamo la vista di creazione, aggiungendo a create-article-form.blade.php
+
+--- PAGE 24 ---
+INSERIMENTO ANNUNCIO ESCLUSIVO PER UTENTI LOGGATI
+A questo punto facciamo in modo che solo gli utenti autenticati possano arrivare a questa pagina.
+Per farlo dobbiamo sfruttare il middleware auth di laravel. 
+Modifichiamo ArticleController.php.
+Stiamo richiamando il metodo statico middleware() fornitoci da laravel 11, che restituisce un array contenente tutti i middleware che 
+vogliamo applicare alle funzioni di questo controller: siccome per il momento vogliamo proteggere solo la funzione create() lo 
+specifichiamo qui.
+Per fare in modo che questo meccanismo funzioni non dobbiamo dimenticarci di specificare che il controller implementa l’interfaccia 
+HasMiddleware e di importare le classi:
+Adesso linkiamo questa pagina nella navbar e in homepage, come richiesto dalla User Story.
+Nel dropdown della navbar visibile solo agli utenti autenticati:
+
+--- PAGE 25 ---
+E nell’homepage:
+REDIRECT ALLA PAGINA DI CREAZIONE DOPO LOGIN/REGISTER
+Infine, vogliamo che un utente appena registrato o loggato sia rimandato alla pagina di creazione, quindi modifichiamo ulteriormente la 
+chiave “home” in fortify.php:
+Una volta testato tutto, possiamo pushare le modifiche su GitHub.
+1git add .
+2git commit -m "User Story 1 completata"
+3git push
