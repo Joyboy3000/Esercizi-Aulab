@@ -6,23 +6,25 @@
                     @if ($article->images->isNotEmpty())
                         @foreach ($article->images as $image)
                             <div class="carousel-item @if ($loop->first) active @endif">
-                                <img src="{{ $image->getUrl(300, 300) }}" class="d-block w-100 thumb-placeholder" alt="Immagine annuncio">
+                                <img src="{{ $image->getUrl() }}" class="d-block mx-auto article-main-image" alt="Immagine annuncio">
                             </div>
                         @endforeach
                     @else
                         <div class="carousel-item active">
-                            <img src="https://picsum.photos/seed/{{ $article->id }}/1000/560" class="d-block w-100 thumb-placeholder" alt="Immagine annuncio">
+                            <img src="https://picsum.photos/seed/{{ $article->id }}/1000/560" class="d-block mx-auto article-main-image" alt="Immagine annuncio">
                         </div>
                     @endif
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#articleCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#articleCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
+                @if ($article->images->count() > 1)
+                    <button class="carousel-control-prev carousel-nav-btn" type="button" data-bs-target="#articleCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next carousel-nav-btn" type="button" data-bs-target="#articleCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                @endif
             </div>
         </div>
 

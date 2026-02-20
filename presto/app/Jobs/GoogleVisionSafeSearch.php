@@ -3,7 +3,12 @@
 namespace App\Jobs;
 
 use App\Models\Image;
-use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\AnnotateImageRequest;
+use Google\Cloud\Vision\V1\BatchAnnotateImagesRequest;
+use Google\Cloud\Vision\V1\Client\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\Feature;
+use Google\Cloud\Vision\V1\Feature\Type as FeatureType;
+use Google\Cloud\Vision\V1\Image as VisionImage;
 use Google\Cloud\Vision\V1\Likelihood;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -43,16 +48,24 @@ class GoogleVisionSafeSearch implements ShouldQueue
                 return;
             }
 
-            $imageAnnotator = new ImageAnnotatorClient([
-                'credentials' => $credentialsPath,
-            ]);
+            $imageAnnotator = new ImageAnnotatorClient(['credentials' => $credentialsPath]);
 
-            $response = $imageAnnotator->safeSearchDetection($imageFile);
-            $safeSearch = $response->getSafeSearchAnnotation();
+            $request = (new AnnotateImageRequest())
+                ->setImage((new VisionImage())->setContent($imageFile))
+                ->setFeatures([
+                    (new Feature())->setType(FeatureType::SAFE_SEARCH_DETECTION),
+                ]);
+
+            $response = $imageAnnotator->batchAnnotateImages(
+                (new BatchAnnotateImagesRequest())->setRequests([$request])
+            );
+
+            $imageAnnotator->close();
+
+            $responses = iterator_to_array($response->getResponses());
+            $safeSearch = ($responses[0] ?? null)?->getSafeSearchAnnotation();
 
             if (! $safeSearch) {
-                $imageAnnotator->close();
-
                 return;
             }
 
@@ -62,8 +75,6 @@ class GoogleVisionSafeSearch implements ShouldQueue
             $imageModel->violence = $this->toIconClass($safeSearch->getViolence());
             $imageModel->racy = $this->toIconClass($safeSearch->getRacy());
             $imageModel->save();
-
-            $imageAnnotator->close();
         } catch (Throwable $e) {
             report($e);
         }

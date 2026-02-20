@@ -3,7 +3,12 @@
 namespace App\Jobs;
 
 use App\Models\Image;
-use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\AnnotateImageRequest;
+use Google\Cloud\Vision\V1\BatchAnnotateImagesRequest;
+use Google\Cloud\Vision\V1\Client\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\Feature;
+use Google\Cloud\Vision\V1\Feature\Type as FeatureType;
+use Google\Cloud\Vision\V1\Image as VisionImage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\File;
@@ -42,12 +47,22 @@ class GoogleVisionLabelImage implements ShouldQueue
                 return;
             }
 
-            $imageAnnotator = new ImageAnnotatorClient([
-                'credentials' => $credentialsPath,
-            ]);
+            $imageAnnotator = new ImageAnnotatorClient(['credentials' => $credentialsPath]);
 
-            $response = $imageAnnotator->labelDetection($imageFile);
-            $labelAnnotations = $response->getLabelAnnotations();
+            $request = (new AnnotateImageRequest())
+                ->setImage((new VisionImage())->setContent($imageFile))
+                ->setFeatures([
+                    (new Feature())->setType(FeatureType::LABEL_DETECTION),
+                ]);
+
+            $response = $imageAnnotator->batchAnnotateImages(
+                (new BatchAnnotateImagesRequest())->setRequests([$request])
+            );
+
+            $imageAnnotator->close();
+
+            $responses = iterator_to_array($response->getResponses());
+            $labelAnnotations = ($responses[0] ?? null)?->getLabelAnnotations() ?? [];
 
             $labels = collect($labelAnnotations)
                 ->map(fn ($label) => $label->getDescription())
@@ -58,8 +73,6 @@ class GoogleVisionLabelImage implements ShouldQueue
 
             $imageModel->labels = $labels;
             $imageModel->save();
-
-            $imageAnnotator->close();
         } catch (Throwable $e) {
             report($e);
         }

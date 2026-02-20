@@ -47,6 +47,7 @@ class Article extends Model
         $this->loadMissing('category');
 
         return [
+            'id' => (int) $this->getKey(),
             'title' => $this->title,
             'description' => $this->description,
             'category' => $this->category?->name,

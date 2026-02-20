@@ -18,16 +18,20 @@
                                 <div class="carousel-inner rounded-3 shadow-sm">
                                     @foreach ($article_to_check->images as $image)
                                         <div class="carousel-item @if ($loop->first) active @endif">
-                                            <img src="{{ $image->getUrl(300, 300) }}" class="d-block w-100 thumb-placeholder" alt="Immagine da revisionare">
+                                            <img src="{{ $image->getUrl() }}" class="d-block mx-auto article-main-image" alt="Immagine da revisionare">
                                         </div>
                                     @endforeach
                                 </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#reviewCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon"></span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#reviewCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon"></span>
-                                </button>
+                                @if ($article_to_check->images->count() > 1)
+                                    <button class="carousel-control-prev carousel-nav-btn" type="button" data-bs-target="#reviewCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next carousel-nav-btn" type="button" data-bs-target="#reviewCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                @endif
                             </div>
                         @else
                             <img class="img-fluid rounded-3" src="https://picsum.photos/seed/rev{{ $article_to_check->id }}/900/520" alt="Anteprima annuncio">
